@@ -87,3 +87,32 @@ update public.profiles set role = 'admin' where id = 'USER_UUID';
   - If you see “policy already exists”, the script now `drop policy if exists ...` before creating.
   - Ensure the authenticated user has a `profiles` row with `role='admin'` and sign out/in to refresh the session.
 
+
+## Docker
+
+Build a production image (uses multi-stage build + Next.js standalone output). Provide public envs at build time for client code. Do NOT pass service role key at build time.
+
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL \
+  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY \
+  -t vibecode:latest .
+```
+
+Run the container with required runtime env vars. The service role key must only be provided at runtime:
+
+```bash
+docker run --rm -p 3000:3000 \
+  -e NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL \
+  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY \
+  -e SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY \
+  vibecode:latest
+```
+
+Environment variables:
+
+- `NEXT_PUBLIC_SUPABASE_URL` – Supabase project URL (public)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` – Supabase anonymous key (public)
+- `SUPABASE_SERVICE_ROLE_KEY` – Supabase service role key (server only; DO NOT expose to the browser)
+
+You can create `.env.local` from `.env.example` for local dev (`npm run dev`), or use `--env-file` to pass envs into `docker run`.
