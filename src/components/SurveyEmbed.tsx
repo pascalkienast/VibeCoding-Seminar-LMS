@@ -261,7 +261,8 @@ export default function SurveyEmbed({ token }: { token: string }) {
               {q.type === "multiple_choice" && (
                 <div className="space-y-2">
                   {opts.map((opt) => {
-                    const current = (v as any)?.values ?? [];
+                    const mv = v as Extract<FormValue, { kind: "multiple_choice" }> | undefined;
+                    const current: string[] = Array.isArray(mv?.values) ? mv!.values : [];
                     const checked = current.includes(opt);
                     return (
                       <label key={opt} className="flex items-start gap-2">
@@ -269,9 +270,9 @@ export default function SurveyEmbed({ token }: { token: string }) {
                           type="checkbox"
                           checked={checked}
                           onChange={(e) => {
-                            const next = new Set(current);
+                            const next = new Set<string>(current);
                             if (e.target.checked) next.add(opt); else next.delete(opt);
-                            onChange(q, { kind: "multiple_choice", values: Array.from(next), otherText: (v as any)?.otherText });
+                            onChange(q, { kind: "multiple_choice", values: Array.from(next), otherText: mv?.otherText });
                           }}
                         />
                         <span className="text-sm break-words leading-snug">{opt}</span>
@@ -285,7 +286,8 @@ export default function SurveyEmbed({ token }: { token: string }) {
                         className="input w-full max-w-xl"
                         value={(v as any)?.otherText ?? ""}
                         onChange={(e) => {
-                          const current = (v as any)?.values ?? [];
+                          const mv = v as Extract<FormValue, { kind: "multiple_choice" }> | undefined;
+                          const current: string[] = Array.isArray(mv?.values) ? mv!.values : [];
                           onChange(q, { kind: "multiple_choice", values: current, otherText: e.target.value });
                         }}
                       />
