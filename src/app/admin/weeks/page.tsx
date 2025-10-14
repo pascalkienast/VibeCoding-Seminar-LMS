@@ -39,7 +39,7 @@ export default function AdminWeeksPage() {
   useEffect(() => { refresh(); }, []);
 
   const onCreate = async () => {
-    if (!weekNumber || !title) return alert("week_number and title required");
+    if (!weekNumber || !title) return alert("Wochennummer und Titel sind erforderlich");
     const supabase = getSupabaseBrowserClient();
     const { data: userData } = await supabase.auth.getUser();
     const created_by = userData.user?.id ?? null;
@@ -60,7 +60,7 @@ export default function AdminWeeksPage() {
     setBody("");
     setIsPublished(false);
     await refresh();
-    alert("Week created");
+    alert("Woche erstellt");
   };
 
   const startEdit = (w: Week) => {
@@ -85,7 +85,7 @@ export default function AdminWeeksPage() {
 
   const onUpdate = async () => {
     if (!editingId) return;
-    if (!editWeekNumber || !editTitle) return alert("week_number and title required");
+    if (!editWeekNumber || !editTitle) return alert("Wochennummer und Titel sind erforderlich");
     const { error } = await getSupabaseBrowserClient()
       .from("weeks")
       .update({
@@ -100,16 +100,16 @@ export default function AdminWeeksPage() {
     if (error) return alert(error.message);
     await refresh();
     cancelEdit();
-    alert("Week updated");
+    alert("Woche aktualisiert");
   };
 
   const onDelete = async (id: number) => {
-    if (!confirm("Delete this week? This cannot be undone.")) return;
+    if (!confirm("Diese Woche löschen? Dies kann nicht rückgängig gemacht werden.")) return;
     const { error } = await getSupabaseBrowserClient().from("weeks").delete().eq("id", id);
     if (error) return alert(error.message);
     if (editingId === id) cancelEdit();
     await refresh();
-    alert("Week deleted");
+    alert("Woche gelöscht");
   };
 
   return (
@@ -119,31 +119,31 @@ export default function AdminWeeksPage() {
       <div className="card space-y-3">
         <div className="grid gap-2 sm:grid-cols-2">
           <div>
-            <label className="block text-sm mb-1">Week Number</label>
+            <label className="block text-sm mb-1">Wochennummer</label>
             <input className="input" type="number" value={weekNumber || ""} onChange={(e) => setWeekNumber(Number(e.target.value))} />
           </div>
           <div>
-            <label className="block text-sm mb-1">Date</label>
+            <label className="block text-sm mb-1">Datum</label>
             <input className="input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
           <div>
-            <label className="block text-sm mb-1">Title</label>
+            <label className="block text-sm mb-1">Titel</label>
             <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm mb-1">Summary</label>
+            <label className="block text-sm mb-1">Zusammenfassung</label>
             <input className="input" value={summary} onChange={(e) => setSummary(e.target.value)} />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm mb-1">Body (Markdown)</label>
+            <label className="block text-sm mb-1">Inhalt (Markdown)</label>
             <textarea className="textarea" value={body} onChange={(e) => setBody(e.target.value)} />
           </div>
           <label className="inline-flex items-center gap-2">
             <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} />
-            <span className="text-sm">Published</span>
+            <span className="text-sm">Veröffentlicht</span>
           </label>
         </div>
-        <button className="btn w-fit" onClick={onCreate}>Create Week</button>
+        <button className="btn w-fit" onClick={onCreate}>Woche erstellen</button>
       </div>
 
       <div className="grid gap-3">
@@ -152,44 +152,44 @@ export default function AdminWeeksPage() {
             <div className="flex items-center justify-between">
               <div className="font-medium">Woche {w.week_number}: {w.title}</div>
               <div className="flex items-center gap-2">
-                <button className="btn-outline-sm" onClick={() => startEdit(w)}>Edit</button>
-                <button className="btn-outline-sm" onClick={() => onDelete(w.id)}>Delete</button>
+                <button className="btn-outline-sm" onClick={() => startEdit(w)}>Bearbeiten</button>
+                <button className="btn-outline-sm" onClick={() => onDelete(w.id)}>Löschen</button>
               </div>
             </div>
             <div className="text-sm text-neutral-600 dark:text-neutral-400">
-              {w.is_published ? "Published" : "Draft"} · {w.date ? new Date(w.date).toLocaleDateString() : "—"}
+              {w.is_published ? "Veröffentlicht" : "Entwurf"} · {w.date ? new Date(w.date).toLocaleDateString() : "—"}
             </div>
             {editingId === w.id && (
               <div className="border-t pt-3 space-y-3">
                 <div className="grid gap-2 sm:grid-cols-2">
                   <div>
-                    <label className="block text-sm mb-1">Week Number</label>
+                    <label className="block text-sm mb-1">Wochennummer</label>
                     <input className="input" type="number" value={editWeekNumber || ""} onChange={(e) => setEditWeekNumber(Number(e.target.value))} />
                   </div>
                   <div>
-                    <label className="block text-sm mb-1">Date</label>
+                    <label className="block text-sm mb-1">Datum</label>
                     <input className="input" type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
                   </div>
                   <div>
-                    <label className="block text-sm mb-1">Title</label>
+                    <label className="block text-sm mb-1">Titel</label>
                     <input className="input" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm mb-1">Summary</label>
+                    <label className="block text-sm mb-1">Zusammenfassung</label>
                     <input className="input" value={editSummary} onChange={(e) => setEditSummary(e.target.value)} />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm mb-1">Body (Markdown)</label>
+                    <label className="block text-sm mb-1">Inhalt (Markdown)</label>
                     <textarea className="textarea" value={editBody} onChange={(e) => setEditBody(e.target.value)} />
                   </div>
                   <label className="inline-flex items-center gap-2">
                     <input type="checkbox" checked={editIsPublished} onChange={(e) => setEditIsPublished(e.target.checked)} />
-                    <span className="text-sm">Published</span>
+                    <span className="text-sm">Veröffentlicht</span>
                   </label>
                 </div>
                 <div className="flex gap-2">
-                  <button className="btn" onClick={onUpdate}>Save</button>
-                  <button className="btn-outline" onClick={cancelEdit}>Cancel</button>
+                  <button className="btn" onClick={onUpdate}>Speichern</button>
+                  <button className="btn-outline" onClick={cancelEdit}>Abbrechen</button>
                 </div>
               </div>
             )}

@@ -66,14 +66,27 @@ export default function AdminSurveysPage() {
       .select("id, survey_id, order_index, type, label, description, required, options, min_value, max_value, allow_other")
       .eq("survey_id", surveyId)
       .order("order_index", { ascending: true });
-    setQuestions(data || []);
+    const list = data || [];
+    setQuestions(list);
+    return list;
   };
 
   useEffect(() => { refreshSurveys(); }, []);
-  useEffect(() => { if (selectedId) { refreshQuestions(selectedId); fetchResults(selectedId); } else { setQuestions([]); setQuestionResults({}); setTotalResponses(0); } }, [selectedId]);
+  useEffect(() => {
+    if (!selectedId) {
+      setQuestions([]);
+      setQuestionResults({});
+      setTotalResponses(0);
+      return;
+    }
+    (async () => {
+      const qs = await refreshQuestions(selectedId);
+      await fetchResults(selectedId, qs);
+    })();
+  }, [selectedId]);
 
   const createSurvey = async () => {
-    if (!title.trim()) return alert("Title required");
+    if (!title.trim()) return alert("Titel erforderlich");
     const { data, error } = await supabase
       .from("surveys")
       .insert({ title, description: description || null, is_anonymous: isAnonymous, is_active: isActive })
@@ -98,7 +111,7 @@ export default function AdminSurveysPage() {
   };
 
   const deleteSurvey = async (survey: Survey) => {
-    if (!confirm("Delete survey and its questions/responses?")) return;
+    if (!confirm("Umfrage und deren Fragen/Antworten löschen?")) return;
     const { error } = await supabase.from("surveys").delete().eq("id", survey.id);
     if (error) return alert(error.message);
     if (selectedId === survey.id) setSelectedId(null);
@@ -106,8 +119,8 @@ export default function AdminSurveysPage() {
   };
 
   const addQuestion = async () => {
-    if (!selectedId) return alert("Select a survey first");
-    if (!qLabel.trim()) return alert("Label required");
+    if (!selectedId) return alert("Bitte zuerst eine Umfrage auswählen");
+    if (!qLabel.trim()) return alert("Beschriftung erforderlich");
     const order_index = (questions[questions.length - 1]?.order_index ?? 0) + 1;
     const options = qType === "single_choice" || qType === "multiple_choice"
       ? qOptions.split("\n").map((s) => s.trim()).filter(Boolean)
@@ -141,13 +154,13 @@ export default function AdminSurveysPage() {
   };
 
   const removeQuestion = async (q: Question) => {
-    if (!confirm("Delete this question?")) return;
+    if (!confirm("Diese Frage löschen?")) return;
     const { error } = await supabase.from("survey_questions").delete().eq("id", q.id);
     if (error) return alert(error.message);
     if (selectedId) await refreshQuestions(selectedId);
   };
 
-  const fetchResults = async (surveyId: number) => {
+  const fetchResults = async (surveyId: number, qsArg?: Question[]) => {
     setResultsLoading(true);
     try {
       const { data: responses } = await supabase
@@ -166,14 +179,15 @@ export default function AdminSurveysPage() {
         .select("response_id, question_id, answer")
         .in("response_id", responseIds);
 
+      const qs = qsArg || questions;
       const byQ: Record<number, any> = {};
-      for (const q of questions) {
+      for (const q of qs) {
         if (q.type === "single_choice" || q.type === "multiple_choice") {
-          byQ[q.id] = { counts: new Map<string, number>(), otherTexts: [] as string[], otherCount: 0, answered: 0 };
+          byQ[q.id] = { kind: q.type, counts: new Map<string, number>(), otherTexts: [] as string[], otherCount: 0, answered: 0 };
         } else if (q.type === "scale") {
-          byQ[q.id] = { counts: new Map<number, number>(), min: q.min_value ?? 1, max: q.max_value ?? 10, answered: 0, sum: 0 };
+          byQ[q.id] = { kind: q.type, counts: new Map<number, number>(), min: q.min_value ?? 1, max: q.max_value ?? 10, answered: 0, sum: 0 };
         } else {
-          byQ[q.id] = { texts: [] as string[], answered: 0 };
+          byQ[q.id] = { kind: q.type, texts: [] as string[], answered: 0 };
         }
       }
 
@@ -181,44 +195,45 @@ export default function AdminSurveysPage() {
         const bucket = byQ[a.question_id];
         if (!bucket) continue;
         const ans = a.answer as any;
-        if (bucket.counts instanceof Map && typeof ans === "object" && ans) {
-          // single_choice or multiple_choice
-          if (ans.type === "option") {
+        if (bucket.kind === "single_choice") {
+          if (ans?.type === "option") {
             const key = String(ans.value ?? "");
             const prev = bucket.counts.get(key) || 0;
             bucket.counts.set(key, prev + 1);
             bucket.answered += 1;
-          } else if (ans.type === "other") {
+          } else if (ans?.type === "other") {
             const text = (ans.value ?? "").toString().trim();
             if (text) bucket.otherTexts.push(text);
             bucket.otherCount += 1;
             bucket.answered += 1;
-          } else if (Array.isArray(ans.values)) {
-            // multiple_choice
-            for (const v of ans.values) {
-              const key = String(v);
-              const prev = bucket.counts.get(key) || 0;
-              bucket.counts.set(key, prev + 1);
-            }
-            if (ans.otherText) {
-              const text = String(ans.otherText);
-              bucket.otherTexts.push(text);
-              bucket.otherCount += 1;
-            }
+          }
+        } else if (bucket.kind === "multiple_choice") {
+          const values: any[] = Array.isArray(ans?.values) ? ans.values : [];
+          for (const v of values) {
+            const key = String(v);
+            const prev = bucket.counts.get(key) || 0;
+            bucket.counts.set(key, prev + 1);
+          }
+          if (ans?.otherText) {
+            const text = String(ans.otherText);
+            bucket.otherTexts.push(text);
+            bucket.otherCount += 1;
+          }
+          if (values.length || ans?.otherText) bucket.answered += 1;
+        } else if (bucket.kind === "scale") {
+          const v = typeof ans?.value === "number" ? ans.value : null;
+          if (v !== null) {
+            const prev = bucket.counts.get(v) || 0;
+            bucket.counts.set(v, prev + 1);
+            bucket.sum += v;
             bucket.answered += 1;
           }
-        } else if (bucket.counts instanceof Map && typeof ans?.value === "number") {
-          // scale
-          const v = ans.value as number;
-          const prev = bucket.counts.get(v) || 0;
-          bucket.counts.set(v, prev + 1);
-          bucket.sum += v;
-          bucket.answered += 1;
-        } else if (typeof ans?.value === "string") {
-          // text
-          const t = ans.value.toString();
-          bucket.texts.push(t);
-          bucket.answered += 1;
+        } else {
+          const t = (ans?.value ?? "").toString();
+          if (t.length) {
+            bucket.texts.push(t);
+            bucket.answered += 1;
+          }
         }
       }
 
@@ -299,28 +314,28 @@ export default function AdminSurveysPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Admin · Surveys</h1>
+      <h1 className="text-2xl font-semibold">Admin · Umfragen</h1>
 
       <div className="card space-y-3">
         <div className="grid gap-2 sm:grid-cols-2">
           <div>
-            <label className="block text-sm mb-1">Title</label>
+            <label className="block text-sm mb-1">Titel</label>
             <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <label className="inline-flex items-center gap-2">
             <input type="checkbox" checked={isAnonymous} onChange={(e) => setIsAnonymous(e.target.checked)} />
-            <span className="text-sm">Anonymous</span>
+            <span className="text-sm">Anonym</span>
           </label>
           <label className="inline-flex items-center gap-2">
             <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-            <span className="text-sm">Active</span>
+            <span className="text-sm">Aktiv</span>
           </label>
           <div className="sm:col-span-2">
-            <label className="block text-sm mb-1">Description</label>
+            <label className="block text-sm mb-1">Beschreibung</label>
             <textarea className="textarea" value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
         </div>
-        <button className="btn w-fit" onClick={createSurvey}>Create Survey</button>
+        <button className="btn w-fit" onClick={createSurvey}>Umfrage erstellen</button>
       </div>
 
       <div className="grid gap-3">
@@ -330,23 +345,23 @@ export default function AdminSurveysPage() {
               <div className="font-medium">{s.title}</div>
               <div className="flex items-center gap-2">
                 <button className="btn-outline-sm" onClick={() => setSelectedId(s.id)}>
-                  {selectedId === s.id ? "Selected" : "Edit"}
+                  {selectedId === s.id ? "Ausgewählt" : "Bearbeiten"}
                 </button>
                 <button className="btn-outline-sm" onClick={() => toggleActive(s)}>
-                  {s.is_active ? "Deactivate" : "Activate"}
+                  {s.is_active ? "Deaktivieren" : "Aktivieren"}
                 </button>
-                <button className="btn-outline-sm" onClick={() => deleteSurvey(s)}>Delete</button>
+                <button className="btn-outline-sm" onClick={() => deleteSurvey(s)}>Löschen</button>
               </div>
             </div>
             <div className="text-sm text-neutral-600 dark:text-neutral-400">
-              Token: &lt;Umfrage{s.token}&gt; · {s.is_anonymous ? "Anonymous" : "Non-anonymous"} · {s.is_active ? "Active" : "Inactive"}
+              Token: &lt;Umfrage{s.token}&gt; · {s.is_anonymous ? "Anonym" : "Nicht anonym"} · {s.is_active ? "Aktiv" : "Inaktiv"}
             </div>
 
             {selectedId === s.id && (
               <div className="border-t pt-3 space-y-3">
                 <div className="grid gap-2 sm:grid-cols-2">
                   <div>
-                    <label className="block text-sm mb-1">Type</label>
+                    <label className="block text-sm mb-1">Typ</label>
                     <select className="input" value={qType} onChange={(e) => setQType(e.target.value as any)}>
                       <option value="short_text">Kurztext</option>
                       <option value="long_text">Langtext</option>
@@ -356,24 +371,24 @@ export default function AdminSurveysPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm mb-1">Label</label>
+                    <label className="block text-sm mb-1">Beschriftung</label>
                     <input className="input" value={qLabel} onChange={(e) => setQLabel(e.target.value)} />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm mb-1">Description</label>
+                    <label className="block text-sm mb-1">Beschreibung</label>
                     <input className="input" value={qDesc} onChange={(e) => setQDesc(e.target.value)} />
                   </div>
                   <label className="inline-flex items-center gap-2">
                     <input type="checkbox" checked={qRequired} onChange={(e) => setQRequired(e.target.checked)} />
-                    <span className="text-sm">Required</span>
+                    <span className="text-sm">Pflichtfeld</span>
                   </label>
                   {(qType === "single_choice" || qType === "multiple_choice") && (
                     <div className="sm:col-span-2">
-                      <label className="block text-sm mb-1">Options (one per line)</label>
+                      <label className="block text-sm mb-1">Optionen (eine pro Zeile)</label>
                       <textarea className="textarea" value={qOptions} onChange={(e) => setQOptions(e.target.value)} />
                       <label className="inline-flex items-center gap-2 mt-2">
                         <input type="checkbox" checked={qOther} onChange={(e) => setQOther(e.target.checked)} />
-                        <span className="text-sm">Allow "Other" free text</span>
+                        <span className="text-sm">Freitext „Anderes“ erlauben</span>
                       </label>
                     </div>
                   )}
@@ -391,7 +406,7 @@ export default function AdminSurveysPage() {
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <button className="btn" onClick={addQuestion}>Add Question</button>
+                  <button className="btn" onClick={addQuestion}>Frage hinzufügen</button>
                 </div>
 
                 <div className="grid gap-2">
@@ -400,25 +415,25 @@ export default function AdminSurveysPage() {
                       <div className="text-sm">
                         <div className="font-medium">[{q.order_index}] {q.label}</div>
                         <div className="text-neutral-600 dark:text-neutral-400">
-                          {q.type} {q.required ? "· required" : ""}
+                          {q.type} {q.required ? "· Pflicht" : ""}
                         </div>
                       </div>
-                      <button className="btn-outline-sm" onClick={() => removeQuestion(q)}>Delete</button>
+                      <button className="btn-outline-sm" onClick={() => removeQuestion(q)}>Löschen</button>
                     </div>
                   ))}
                 </div>
 
                 <div className="pt-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="font-medium">Results</div>
+                    <div className="font-medium">Ergebnisse</div>
                     <div className="flex items-center gap-2">
-                      <button className="btn-outline-sm" onClick={() => selectedId && fetchResults(selectedId)}>Refresh</button>
-                      <button className="btn-outline-sm" onClick={exportCSV}>Export CSV</button>
+                      <button className="btn-outline-sm" onClick={() => selectedId && fetchResults(selectedId)}>Aktualisieren</button>
+                      <button className="btn-outline-sm" onClick={exportCSV}>CSV exportieren</button>
                     </div>
                   </div>
-                  <div className="text-sm text-neutral-600 dark:text-neutral-400">Total responses: {totalResponses}</div>
+                  <div className="text-sm text-neutral-600 dark:text-neutral-400">Antworten gesamt: {totalResponses}</div>
                   {resultsLoading ? (
-                    <div className="text-sm">Loading results…</div>
+                    <div className="text-sm">Ergebnisse laden…</div>
                   ) : (
                     <div className="grid gap-3">
                       {questions.map((q) => {
@@ -427,11 +442,11 @@ export default function AdminSurveysPage() {
                           <div key={`res_${q.id}`} className="border p-2 rounded-md">
                             <div className="font-medium">[{q.order_index}] {q.label}</div>
                             {!res ? (
-                              <div className="text-sm text-neutral-600 dark:text-neutral-400">No answers</div>
+                              <div className="text-sm text-neutral-600 dark:text-neutral-400">Keine Antworten</div>
                             ) : q.type === "scale" ? (
                               <div className="text-sm mt-1 space-y-1">
-                                <div>Answered: {res.answered}</div>
-                                <div>Average: {res.answered ? (res.sum / res.answered).toFixed(2) : "-"}</div>
+                                <div>Beantwortet: {res.answered}</div>
+                                <div>Durchschnitt: {res.answered ? (res.sum / res.answered).toFixed(2) : "-"}</div>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 mt-1">
                                   {Array.from({ length: (q.max_value ?? 10) - (q.min_value ?? 1) + 1 }).map((_, idx) => {
                                     const v = (q.min_value ?? 1) + idx;
@@ -442,7 +457,7 @@ export default function AdminSurveysPage() {
                               </div>
                             ) : q.type === "single_choice" || q.type === "multiple_choice" ? (
                               <div className="text-sm mt-1 space-y-1">
-                                <div>Answered: {res.answered}</div>
+                                <div>Beantwortet: {res.answered}</div>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
                                   {Object.entries(res.counts as Record<string, number>).map(([opt, c]: any) => (
                                     <div key={opt} className="text-xs">{opt || "—"}: {c}</div>
@@ -450,14 +465,14 @@ export default function AdminSurveysPage() {
                                 </div>
                                 {res.otherCount > 0 && (
                                   <div className="mt-1">
-                                    <div className="text-xs font-medium">Other ({res.otherCount}):</div>
+                                    <div className="text-xs font-medium">Anderes ({res.otherCount}):</div>
                                     <div className="text-xs whitespace-pre-wrap max-h-40 overflow-auto">{res.otherTexts.slice(0, 20).map((t: string, i: number) => `- ${t}`).join("\n")}</div>
                                   </div>
                                 )}
                               </div>
                             ) : (
                               <div className="text-sm mt-1">
-                                <div>Answered: {res.answered}</div>
+                                <div>Beantwortet: {res.answered}</div>
                                 <div className="text-xs whitespace-pre-wrap max-h-60 overflow-auto mt-1">
                                   {res.texts.slice(0, 50).map((t: string, i: number) => `- ${t}`).join("\n")}
                                 </div>

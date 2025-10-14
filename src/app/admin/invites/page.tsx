@@ -30,7 +30,7 @@ export default function InvitesPage() {
   useEffect(() => { refresh(); }, []);
 
   const createInvite = async () => {
-    if (!plainCode) return alert("Enter a code to hash");
+    if (!plainCode) return alert("Bitte einen Code zum Hashen eingeben");
     const code_hash = bcrypt.hashSync(plainCode, 10);
     const { error } = await getSupabaseBrowserClient().from("invite_codes").insert({
       code_hash,
@@ -43,40 +43,40 @@ export default function InvitesPage() {
       setPlainCode("");
       setLabel("");
       await refresh();
-      alert("Invite created");
+      alert("Einladung erstellt");
     }
   };
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Invites</h1>
+      <h1 className="text-2xl font-semibold">Einladungen</h1>
       <div className="card space-y-3">
         <div className="grid gap-2 sm:grid-cols-2">
           <div>
-            <label className="block text-sm mb-1">Plain Code (hashed before save)</label>
+            <label className="block text-sm mb-1">Klartext-Code (wird vor dem Speichern gehasht)</label>
             <input className="input" value={plainCode} onChange={(e) => setPlainCode(e.target.value)} />
           </div>
           <div>
-            <label className="block text-sm mb-1">Label</label>
+            <label className="block text-sm mb-1">Bezeichnung</label>
             <input className="input" value={label} onChange={(e) => setLabel(e.target.value)} />
           </div>
           <div>
-            <label className="block text-sm mb-1">Role</label>
+            <label className="block text-sm mb-1">Rolle</label>
             <select
               className="input"
               value={role}
               onChange={(e) => setRole((e.target.value as "student" | "admin"))}
             >
-              <option value="student">student</option>
-              <option value="admin">admin</option>
+              <option value="student">Student</option>
+              <option value="admin">Admin</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm mb-1">Max Uses</label>
+            <label className="block text-sm mb-1">Max. Nutzungen</label>
             <input className="input" type="number" value={maxUses} onChange={(e) => setMaxUses(Number(e.target.value))} />
           </div>
         </div>
-        <button className="btn w-fit" onClick={createInvite}>Create Invite</button>
+        <button className="btn w-fit" onClick={createInvite}>Einladung erstellen</button>
       </div>
 
       <div className="grid gap-3">
@@ -84,10 +84,10 @@ export default function InvitesPage() {
           <div className="card" key={i.id}>
             <div className="flex items-center justify-between">
               <div className="font-medium">{i.label || `#${i.id}`}</div>
-              <div className="text-sm">{i.role}</div>
+              <div className="text-sm">{i.role === "admin" ? "Admin" : "Student"}</div>
             </div>
             <div className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
-              {i.used_count}/{i.max_uses ?? 1} uses
+              {i.used_count}/{i.max_uses ?? 1} Nutzungen
             </div>
           </div>
         ))}

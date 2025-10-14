@@ -38,7 +38,7 @@ export default function AdminNewsPage() {
   useEffect(() => { refresh(); }, []);
 
   const onCreate = async () => {
-    if (!slug || !title || !body) return alert("slug, title, body required");
+    if (!slug || !title || !body) return alert("Slug, Titel und Inhalt sind erforderlich");
     const supabase = getSupabaseBrowserClient();
     const { data: userData } = await supabase.auth.getUser();
     const author_id = userData.user?.id ?? null;
@@ -58,7 +58,7 @@ export default function AdminNewsPage() {
     setBody("");
     setIsPublic(false);
     await refresh();
-    alert("News created");
+    alert("News erstellt");
   };
 
   const startEdit = (n: News) => {
@@ -81,7 +81,7 @@ export default function AdminNewsPage() {
 
   const onUpdate = async () => {
     if (!editingId) return;
-    if (!editSlug || !editTitle || !editBody) return alert("slug, title, body required");
+    if (!editSlug || !editTitle || !editBody) return alert("Slug, Titel und Inhalt sind erforderlich");
     const { error } = await getSupabaseBrowserClient()
       .from("news")
       .update({
@@ -95,16 +95,16 @@ export default function AdminNewsPage() {
     if (error) return alert(error.message);
     await refresh();
     cancelEdit();
-    alert("News updated");
+    alert("News aktualisiert");
   };
 
   const onDelete = async (id: number) => {
-    if (!confirm("Delete this news item? This cannot be undone.")) return;
+    if (!confirm("Diesen News-Eintrag löschen? Dies kann nicht rückgängig gemacht werden.")) return;
     const { error } = await getSupabaseBrowserClient().from("news").delete().eq("id", id);
     if (error) return alert(error.message);
     if (editingId === id) cancelEdit();
     await refresh();
-    alert("News deleted");
+    alert("News gelöscht");
   };
 
   return (
@@ -118,23 +118,23 @@ export default function AdminNewsPage() {
             <input className="input" value={slug} onChange={(e) => setSlug(e.target.value)} />
           </div>
           <div>
-            <label className="block text-sm mb-1">Title</label>
+            <label className="block text-sm mb-1">Titel</label>
             <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm mb-1">Excerpt</label>
+            <label className="block text-sm mb-1">Auszug</label>
             <input className="input" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm mb-1">Body (Markdown)</label>
+            <label className="block text-sm mb-1">Inhalt (Markdown)</label>
             <textarea className="textarea" value={body} onChange={(e) => setBody(e.target.value)} />
           </div>
           <label className="inline-flex items-center gap-2">
             <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
-            <span className="text-sm">Public</span>
+            <span className="text-sm">Öffentlich</span>
           </label>
         </div>
-        <button className="btn w-fit" onClick={onCreate}>Create News</button>
+        <button className="btn w-fit" onClick={onCreate}>News erstellen</button>
       </div>
 
       <div className="grid gap-3">
@@ -143,13 +143,13 @@ export default function AdminNewsPage() {
             <div className="flex items-center justify-between">
               <div className="font-medium">{n.title}</div>
               <div className="flex items-center gap-2">
-                <button className="btn-outline-sm" onClick={() => startEdit(n)}>Edit</button>
-                <button className="btn-outline-sm" onClick={() => onDelete(n.id)}>Delete</button>
-                <a className="btn-outline-sm" href={`/news/${n.slug}`}>Open</a>
+                <button className="btn-outline-sm" onClick={() => startEdit(n)}>Bearbeiten</button>
+                <button className="btn-outline-sm" onClick={() => onDelete(n.id)}>Löschen</button>
+                <a className="btn-outline-sm" href={`/news/${n.slug}`}>Öffnen</a>
               </div>
             </div>
             <div className="text-sm text-neutral-600 dark:text-neutral-400">
-              {n.is_public ? "Public" : "Members"} · {n.published_at ? new Date(n.published_at).toLocaleString() : "—"}
+              {n.is_public ? "Öffentlich" : "Mitglieder"} · {n.published_at ? new Date(n.published_at).toLocaleString() : "—"}
             </div>
             {n.excerpt && <div className="text-sm mt-1">{n.excerpt}</div>}
 
@@ -161,25 +161,25 @@ export default function AdminNewsPage() {
                     <input className="input" value={editSlug} onChange={(e) => setEditSlug(e.target.value)} />
                   </div>
                   <div>
-                    <label className="block text-sm mb-1">Title</label>
+                    <label className="block text-sm mb-1">Titel</label>
                     <input className="input" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm mb-1">Excerpt</label>
+                    <label className="block text-sm mb-1">Auszug</label>
                     <input className="input" value={editExcerpt} onChange={(e) => setEditExcerpt(e.target.value)} />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm mb-1">Body (Markdown)</label>
+                    <label className="block text-sm mb-1">Inhalt (Markdown)</label>
                     <textarea className="textarea" value={editBody} onChange={(e) => setEditBody(e.target.value)} />
                   </div>
                   <label className="inline-flex items-center gap-2">
                     <input type="checkbox" checked={editIsPublic} onChange={(e) => setEditIsPublic(e.target.checked)} />
-                    <span className="text-sm">Public</span>
+                    <span className="text-sm">Öffentlich</span>
                   </label>
                 </div>
                 <div className="flex gap-2">
-                  <button className="btn" onClick={onUpdate}>Save</button>
-                  <button className="btn-outline" onClick={cancelEdit}>Cancel</button>
+                  <button className="btn" onClick={onUpdate}>Speichern</button>
+                  <button className="btn-outline" onClick={cancelEdit}>Abbrechen</button>
                 </div>
               </div>
             )}

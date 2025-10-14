@@ -23,7 +23,7 @@ export default async function NewsListPage() {
             <div className="flex items-center justify-between">
               <h2 className="font-medium">{n.title}</h2>
               {!n.is_public && (
-                <span className="text-xs px-2 py-0.5 rounded bg-neutral-200 dark:bg-neutral-800">members</span>
+                <span className="text-xs px-2 py-0.5 rounded bg-neutral-200 dark:bg-neutral-800">Mitglieder</span>
               )}
             </div>
             {n.excerpt && (

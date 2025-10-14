@@ -17,7 +17,7 @@ export default async function NewsDetailPage({ params }: Params) {
     .eq("slug", params.slug)
     .single();
 
-  if (!data) return <div className="prose dark:prose-invert">Not found</div>;
+  if (!data) return <div className="prose dark:prose-invert">Nicht gefunden</div>;
 
   return (
     <article className="prose dark:prose-invert max-w-none">
@@ -26,8 +26,8 @@ export default async function NewsDetailPage({ params }: Params) {
       {data.is_public && (
         <ShowWhenLoggedOut>
           <div className="not-prose mt-6 p-4 border rounded-lg">
-            <p className="text-sm">Enjoyed this article? Register to get access to the course.</p>
-            <a className="btn mt-2 inline-block" href="/register">Register</a>
+            <p className="text-sm">Hat dir dieser Artikel gefallen? Registriere dich, um Zugang zum Kurs zu erhalten.</p>
+            <a className="btn mt-2 inline-block" href="/register">Registrieren</a>
           </div>
         </ShowWhenLoggedOut>
       )}

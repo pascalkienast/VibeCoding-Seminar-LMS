@@ -26,14 +26,14 @@ export default function WeekDetail({ params }: Params) {
     <RequireAuth>
       <article className="prose dark:prose-invert max-w-none">
         {!week ? (
-          <div>Not found</div>
+          <div>Nicht gefunden</div>
         ) : (
           <>
             <h1>Woche {week.week_number}: {week.title}</h1>
             <MarkdownWithSurveys markdown={week.body || ""} />
             <div className="flex gap-2 mt-6">
-              <a className="btn-outline" href={`/lehrplan/${prev}`}>← Prev</a>
-              <a className="btn-outline" href={`/lehrplan/${next}`}>Next →</a>
+              <a className="btn-outline" href={`/lehrplan/${prev}`}>← Zurück</a>
+              <a className="btn-outline" href={`/lehrplan/${next}`}>Weiter →</a>
             </div>
           </>
         )}

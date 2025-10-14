@@ -20,7 +20,7 @@ export default function Header() {
     <header className="border-b border-neutral-200 dark:border-neutral-800">
       <div className="container py-3 flex items-center justify-between">
         <div className="flex items-center gap-4 text-sm">
-          <Link href="/news" aria-label="Home" className="font-medium">Home</Link>
+          <Link href="/news" aria-label="Start" className="font-medium">Start</Link>
           <div className="hidden sm:flex items-center gap-4">
             <Link href="/lehrplan" aria-label="Lehrplan">Lehrplan</Link>
             <Link href="/forum" aria-label="Forum">Forum</Link>
@@ -30,7 +30,7 @@ export default function Header() {
           <Navbar />
         </div>
         <button
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-label={mobileOpen ? "Menü schließen" : "Menü öffnen"}
           aria-expanded={mobileOpen}
           aria-controls="mobile-menu"
           className="sm:hidden inline-flex items-center justify-center rounded-md border border-neutral-300 dark:border-neutral-700 p-2"

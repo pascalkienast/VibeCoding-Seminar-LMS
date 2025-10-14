@@ -53,8 +53,8 @@ export default function Navbar({ layout = "horizontal" }: NavbarProps) {
   if (!isAuthed) {
     return (
       <div className={containerClass}>
-        <a className={`btn-sm${fillIfVertical}`} href="/login">Login</a>
-        <a className={`btn-outline-sm${fillIfVertical}`} href="/register">Register</a>
+        <a className={`btn-sm${fillIfVertical}`} href="/login">Einloggen</a>
+        <a className={`btn-outline-sm${fillIfVertical}`} href="/register">Registrieren</a>
       </div>
     );
   }
@@ -67,8 +67,8 @@ export default function Navbar({ layout = "horizontal" }: NavbarProps) {
   return (
     <div className={containerClass}>
       {isAdmin && <a className={`btn-outline-sm${fillIfVertical}`} href="/admin">Admin</a>}
-      <a className={`btn-outline-sm${fillIfVertical}`} href="/profile">Profile</a>
-      <button className={`btn-sm${fillIfVertical}`} onClick={onLogout}>Logout</button>
+      <a className={`btn-outline-sm${fillIfVertical}`} href="/profile">Profil</a>
+      <button className={`btn-sm${fillIfVertical}`} onClick={onLogout}>Abmelden</button>
     </div>
   );
 }
