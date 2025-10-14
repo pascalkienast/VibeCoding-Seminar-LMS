@@ -1,5 +1,5 @@
 "use client";
-import ReactMarkdown from "react-markdown";
+import MarkdownWithSurveys from "@/components/MarkdownWithSurveys";
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
 import RequireAuth from "@/components/RequireAuth";
@@ -30,7 +30,7 @@ export default function WeekDetail({ params }: Params) {
         ) : (
           <>
             <h1>Woche {week.week_number}: {week.title}</h1>
-            <ReactMarkdown>{week.body}</ReactMarkdown>
+            <MarkdownWithSurveys markdown={week.body || ""} />
             <div className="flex gap-2 mt-6">
               <a className="btn-outline" href={`/lehrplan/${prev}`}>← Prev</a>
               <a className="btn-outline" href={`/lehrplan/${next}`}>Next →</a>

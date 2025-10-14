@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import ReactMarkdown from "react-markdown";
+import MarkdownWithSurveys from "@/components/MarkdownWithSurveys";
 import ShowWhenLoggedOut from "@/components/ShowWhenLoggedOut";
 
 interface Params { params: { slug: string } }
@@ -22,7 +22,7 @@ export default async function NewsDetailPage({ params }: Params) {
   return (
     <article className="prose dark:prose-invert max-w-none">
       <h1>{data.title}</h1>
-      <ReactMarkdown>{data.body}</ReactMarkdown>
+      <MarkdownWithSurveys markdown={data.body || ""} />
       {data.is_public && (
         <ShowWhenLoggedOut>
           <div className="not-prose mt-6 p-4 border rounded-lg">

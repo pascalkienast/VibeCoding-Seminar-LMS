@@ -15,6 +15,10 @@ export default function AdminIndex() {
           <div className="font-medium">Invites</div>
           <div className="text-sm text-neutral-600 dark:text-neutral-400">Manage invite codes</div>
         </a>
+        <a className="card block" href="/admin/surveys">
+          <div className="font-medium">Surveys</div>
+          <div className="text-sm text-neutral-600 dark:text-neutral-400">Create surveys and questions</div>
+        </a>
       </div>
     </div>
   );

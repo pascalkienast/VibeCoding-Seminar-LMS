@@ -3,7 +3,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { useEffect, useState } from "react";
 
-export default function Navbar() {
+type NavbarProps = {
+  layout?: "horizontal" | "vertical";
+};
+
+export default function Navbar({ layout = "horizontal" }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isAuthed, setIsAuthed] = useState<boolean>(false);
@@ -39,11 +43,18 @@ export default function Navbar() {
     return null;
   }
 
+  const containerClass =
+    layout === "vertical"
+      ? "flex flex-col items-stretch gap-2 text-sm"
+      : "flex items-center gap-2 text-sm";
+
+  const fillIfVertical = layout === "vertical" ? " w-full" : "";
+
   if (!isAuthed) {
     return (
-      <div className="flex items-center gap-2 text-sm">
-        <a className="btn-sm" href="/login">Login</a>
-        <a className="btn-outline-sm" href="/register">Register</a>
+      <div className={containerClass}>
+        <a className={`btn-sm${fillIfVertical}`} href="/login">Login</a>
+        <a className={`btn-outline-sm${fillIfVertical}`} href="/register">Register</a>
       </div>
     );
   }
@@ -54,10 +65,10 @@ export default function Navbar() {
   };
 
   return (
-    <div className="flex items-center gap-2 text-sm">
-      {isAdmin && <a className="btn-outline-sm" href="/admin">Admin</a>}
-      <a className="btn-outline-sm" href="/profile">Profile</a>
-      <button className="btn-sm" onClick={onLogout}>Logout</button>
+    <div className={containerClass}>
+      {isAdmin && <a className={`btn-outline-sm${fillIfVertical}`} href="/admin">Admin</a>}
+      <a className={`btn-outline-sm${fillIfVertical}`} href="/profile">Profile</a>
+      <button className={`btn-sm${fillIfVertical}`} onClick={onLogout}>Logout</button>
     </div>
   );
 }

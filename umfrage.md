@@ -63,6 +63,7 @@ Hallo zusammen! Damit ich das Seminar möglichst gut auf eure Interessen und Bed
 - [ ] Bias und Diskriminierung
 - [ ] Umweltauswirkungen (Energieverbrauch)
 - [ ] Verlust des eigenständigen Denkens
+- [ ] Verlust von Kultur (AI Slop)
 - [ ] "Black Box" – nicht nachvollziehbar
 - [ ] Konzentration von Macht bei Tech-Konzernen
 - [ ] Habe keine Bedenken

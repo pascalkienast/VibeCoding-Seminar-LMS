@@ -54,3 +54,36 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Admin Features
+
+Admin UI is available to users whose `profiles.role = 'admin'`.
+
+- Routes
+  - `/admin` – dashboard
+  - `/admin/news` – create, edit, delete news posts (slug, title, excerpt, body, public)
+  - `/admin/weeks` – create, edit, delete Lehrplan weeks (number, date, title, summary, body, published)
+  - `/admin/invites` – create invite codes (hashed client‑side), choose role and max uses
+
+- Navigation
+  - The top‑right navbar shows an `Admin` button only for admins.
+
+- Access control (Supabase RLS)
+  - Run `policy-fixes.sql` in the Supabase SQL editor to install safe, idempotent policies:
+    - Adds helper `public.is_admin(uid uuid)` (security definer)
+    - Enables admin write access on `news`, `weeks`, forum tables and `invite_codes` with USING + WITH CHECK
+    - Ensures `weeks` can be read by authenticated users only
+
+- Grant admin role
+  - Option 1: Create an invite with role `admin` at `/admin/invites` and register using that code.
+  - Option 2: Promote an existing user in SQL:
+
+```sql
+update public.profiles set role = 'admin' where id = 'USER_UUID';
+```
+
+- Troubleshooting
+  - If inserts/updates fail as admin, re‑run `policy-fixes.sql` to refresh policies.
+  - If you see “policy already exists”, the script now `drop policy if exists ...` before creating.
+  - Ensure the authenticated user has a `profiles` row with `role='admin'` and sign out/in to refresh the session.
+
