@@ -8,7 +8,7 @@
 
 **Apps bauen ohne zu programmieren? KI-gestützte Softwareentwicklung zwischen Kreativität und Kontrollverlust**  
 Dozent: Pascal Kienast  
-Termin: Dienstags, 16:00-18:00 Uhr  
+Termin: Dienstags, 16:15-17:45 Uhr  
 Ort: TBA  
 SWS: 2  
 Studiengang: BA  
