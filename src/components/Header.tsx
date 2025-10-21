@@ -24,6 +24,7 @@ export default function Header() {
           <div className="hidden sm:flex items-center gap-4">
             <Link href="/lehrplan" aria-label="Lehrplan">Lehrplan</Link>
             <Link href="/forum" aria-label="Forum">Forum</Link>
+            <Link href="/tools" aria-label="Tools">Tools</Link>
           </div>
         </div>
         <div className="hidden sm:block">
@@ -60,6 +61,7 @@ export default function Header() {
           <div className="container py-3 flex flex-col gap-3 text-sm">
             <Link href="/lehrplan" aria-label="Lehrplan" className="py-1">Lehrplan</Link>
             <Link href="/forum" aria-label="Forum" className="py-1">Forum</Link>
+            <Link href="/tools" aria-label="Tools" className="py-1">Tools</Link>
             <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800" />
             <Navbar layout="vertical" />
           </div>
