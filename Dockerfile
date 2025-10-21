@@ -39,6 +39,7 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
+# Copy public directory (includes presentations, images, and other static assets)
 COPY --from=build /app/public ./public
 
 # Use non-root user

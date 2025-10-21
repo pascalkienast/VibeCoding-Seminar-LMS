@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Coding - Erste Sitzung</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/theme/black.css">
+    <style>
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-pink: #ff006e;
+            --neon-purple: #8b5cf6;
+            --dark-bg: #0a0a0f;
+            --darker-bg: #050508;
+        }
+
+        .reveal {
+            background: linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: clamp(16px, 1.8vw, 28px); /* Automatisches Scaling basierend auf Viewport */
+        }
+
+        .reveal h1, .reveal h2, .reveal h3 {
+            font-weight: 700;
+            text-transform: none;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            margin-bottom: 0.4em;
+        }
+
+        .reveal h1 {
+            font-size: clamp(1.8em, 4vw, 2.5em);
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+
+        .reveal h2 {
+            color: var(--neon-cyan);
+            font-size: clamp(1.3em, 3vw, 1.8em);
+            margin-bottom: 0.4em;
+            line-height: 1.2;
+        }
+
+        .reveal h3 {
+            color: var(--neon-purple);
+            font-size: clamp(1em, 2vw, 1.4em);
+            margin-bottom: 0.3em;
+            line-height: 1.2;
+        }
+
+        .reveal p {
+            margin: 0.3em 0;
+            line-height: 1.3;
+        }
+
+        .reveal ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0.4em 0;
+        }
+
+        .reveal ul li {
+            margin: 0.35em 0;
+            padding-left: 1em;
+            position: relative;
+            font-size: clamp(0.8em, 1.5vw, 0.95em);
+            line-height: 1.3;
+        }
+
+        .reveal ul li::before {
+            content: "▹";
+            color: var(--neon-cyan);
+            font-size: clamp(1em, 1.8vw, 1.3em);
+            position: absolute;
+            left: 0;
+            top: -0.05em;
+        }
+
+        .reveal strong {
+            color: var(--neon-pink);
+            font-weight: 700;
+        }
+
+        .reveal em {
+            color: var(--neon-purple);
+            font-style: normal;
+        }
+
+        .highlight-box {
+            background: rgba(139, 92, 246, 0.1);
+            border: 2px solid var(--neon-purple);
+            border-radius: 6px;
+            padding: 0.7em;
+            margin: 0.5em 0;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+
+        .highlight-box h3 {
+            margin-bottom: 0.2em;
+        }
+
+        .highlight-box p {
+            margin: 0.2em 0;
+        }
+
+        .warning-box {
+            background: rgba(255, 0, 110, 0.1);
+            border: 2px solid var(--neon-pink);
+            border-radius: 6px;
+            padding: 0.7em;
+            margin: 0.5em 0;
+        }
+
+        .warning-box h3 {
+            margin-bottom: 0.2em;
+        }
+
+        .warning-box p {
+            margin: 0.2em 0;
+        }
+
+        .info-text {
+            color: var(--neon-cyan);
+            font-size: 0.8em;
+            margin-top: 0.4em;
+            line-height: 1.2;
+        }
+
+        .large-emoji {
+            font-size: clamp(2em, 4vw, 3em);
+            margin: 0.2em 0;
+            line-height: 1;
+        }
+
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1em 0;
+            font-size: clamp(0.6em, 1.2vw, 0.85em);
+            gap: 0.5em;
+        }
+
+        .timeline-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .timeline-item p {
+            font-size: clamp(0.85em, 1.5vw, 1em);
+            line-height: 1.3;
+            margin-top: 0.3em;
+        }
+
+        .timeline-year {
+            color: var(--neon-cyan);
+            font-weight: bold;
+            font-size: clamp(1em, 2vw, 1.3em);
+            margin-bottom: 0.3em;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8em;
+            margin: 0.6em 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.7em;
+            margin: 0.6em 0;
+        }
+
+        .stat-box {
+            background: rgba(0, 255, 255, 0.05);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 6px;
+            padding: 0.7em;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: clamp(1.5em, 3vw, 2.2em);
+            color: var(--neon-pink);
+            font-weight: bold;
+            line-height: 1;
+            margin-bottom: 0.15em;
+        }
+
+        .stat-label {
+            color: var(--neon-cyan);
+            margin-top: 0.2em;
+            font-size: clamp(0.75em, 1.5vw, 0.95em);
+            line-height: 1.2;
+        }
+
+        code {
+            background: rgba(0, 255, 255, 0.1);
+            color: var(--neon-cyan);
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: clamp(0.8em, 1.4vw, 0.95em);
+        }
+
+        .reveal .slides section {
+            text-align: left;
+            height: 100%;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .reveal .slides section.center {
+            text-align: center;
+        }
+
+        .arrow {
+            color: var(--neon-pink);
+            font-size: 1.2em;
+            margin: 0 0.2em;
+        }
+
+        .checkmark {
+            color: #00ff88;
+            font-size: 1em;
+        }
+
+        .question {
+            font-size: clamp(0.95em, 2vw, 1.2em);
+            color: var(--neon-purple);
+            font-style: italic;
+            text-align: center;
+            margin: 1em 0;
+            padding: 0.8em;
+            border-left: 4px solid var(--neon-purple);
+            line-height: 1.3;
+        }
+
+        /* Spezielle Anpassungen für volle Slides */
+        .compact {
+            font-size: clamp(0.75em, 1.5vw, 0.9em);
+        }
+
+        .compact h2 {
+            font-size: clamp(1.3em, 2.5vw, 1.6em);
+            margin-bottom: 0.3em;
+        }
+
+        .compact h3 {
+            font-size: clamp(1em, 1.8vw, 1.25em);
+        }
+
+        .compact ul li {
+            margin: 0.3em 0;
+            font-size: clamp(0.85em, 1.4vw, 0.95em);
+        }
+
+        .compact .grid-2,
+        .compact .grid-3 {
+            margin: 0.5em 0;
+            gap: 0.6em;
+        }
+
+        .compact .highlight-box,
+        .compact .warning-box {
+            padding: 0.6em;
+            margin: 0.4em 0;
+        }
+
+        /* Media Queries für zusätzliche Anpassungen */
+        @media screen and (max-width: 900px) {
+            .reveal {
+                font-size: clamp(14px, 2vw, 22px);
+            }
+        }
+
+        @media screen and (min-width: 1600px) {
+            .reveal {
+                font-size: clamp(20px, 1.5vw, 32px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            
+            <!-- Slide 1: Titel -->
+            <section class="center">
+                <h1>Vibe Coding</h1>
+                <h3>KI-gestützte App-Entwicklung jenseits klassischer Programmierung</h3>
+                <div style="margin-top: 3em;">
+                    <p class="info-text">📅 21. Oktober 2025 | 16:25-17:45 Uhr</p>
+                    <p class="info-text">📍 FHP, Raum D307</p>
+                    <p class="info-text">Pascal Kienast | EMW WiSe 2025/26</p>
+                </div>
+            </section>
+
+            <!-- Slide 2: Was war das gerade? -->
+            <section class="center">
+                <h1>Was war das gerade?</h1>
+                <div class="large-emoji">✨🤖💻</div>
+                <div class="highlight-box" style="margin-top: 2em;">
+                    <h3>Das war <em>Vibe Coding</em></h3>
+                    <p style="font-size: 1.2em; margin-top: 1em;">Eine App oder Webseite in wenigen Minuten – nur mit natürlicher Sprache</p>
+                </div>
+                <p class="info-text" style="margin-top: 2em;">Darum geht es in diesem Seminar.</p>
+            </section>
+
+            <!-- Slide 3: Vorstellung -->
+            <section>
+                <h2>Wer bin ich?</h2>
+                <ul>
+                    <li><strong>Pascal Kienast</strong> – Student EMW (BA)</li>
+                    <li>Softwareentwickler im Präsidialamt (E-Learning-Plattform)</li>
+                    <li>Vorher: Wirtschaftsinformatik studiert</li>
+                    <li>Self-taught Programmer seit vielen Jahren</li>
+                </ul>
+                <div class="highlight-box" style="margin-top: 2em;">
+                    <p><strong>Dieses Seminar:</strong> Modul 11 Projektarbeit</p>
+                    <p style="margin-top: 0.5em;">→ Gemeinsamer Lernprozess!</p>
+                    <p style="margin-top: 0.5em;">→ Medienwissenschaftlicher Zugang zu Tech</p>
+                </div>
+            </section>
+
+            <!-- Slide 4: Wer seid ihr? -->
+            <section>
+                <h2>Wer seid ihr?</h2>
+                <div class="grid-2">
+                    <div class="stat-box">
+                        <div class="stat-number">84%</div>
+                        <div class="stat-label">KEINE Programmiererfahrung</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">19</div>
+                        <div class="stat-label">Umfrage Teilnehmende</div>
+                    </div>
+                </div>
+                <div class="highlight-box" style="margin-top: 2em;">
+                    <h3>Programmiererfahrung</h3>
+                    <ul>
+                        <li><strong>16 von 19:</strong> Noch nie programmiert</li>
+                        <li><strong>3 Personen:</strong> Grundkenntnisse</li>
+                    </ul>
+                    <p class="info-text" style="text-align: center; margin-top: 1em; font-size: 1.3em;">
+                        <span class="checkmark">✓</span> <strong>Ihr seid genau richtig hier!</strong>
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 5: KI-Erfahrung -->
+            <section>
+                <h2>Eure KI-Erfahrung</h2>
+                <div class="grid-3">
+                    <div class="stat-box">
+                        <div class="stat-number">18/19</div>
+                        <div class="stat-label">nutzen ChatGPT für Texte</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">6</div>
+                        <div class="stat-label">nutzen KI für Bilder</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">5.6</div>
+                        <div class="stat-label">⌀ Technik-Affinität (von 10)</div>
+                    </div>
+                </div>
+                <p class="info-text" style="text-align: center; margin-top: 1.5em;">
+                    <strong>4 Personen</strong> nutzen KI auch für Audio/Video
+                </p>
+                <p class="info-text" style="text-align: center; margin-top: 1em; font-size: 1.2em;">
+                    <strong>→ Gute Basis zum Experimentieren!</strong>
+                </p>
+            </section>
+
+            <!-- Slide 6: Haltung zu KI -->
+            <section class="compact">
+                <h2>Eure Haltung zu KI</h2>
+                <div class="grid-3" style="margin-bottom: 1em;">
+                    <div class="stat-box">
+                        <div class="stat-number">14</div>
+                        <div class="stat-label">Ambivalent</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Eher positiv</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">2</div>
+                        <div class="stat-label">Eher skeptisch</div>
+                    </div>
+                </div>
+                <h3 style="margin-top: 1em;">Eure Top-Bedenken:</h3>
+                <div class="grid-2">
+                    <ul>
+                        <li>Verlust eigenständigen Denkens <strong>(12×)</strong></li>
+                        <li>Datenschutz & Privatsphäre <strong>(11×)</strong></li>
+                        <li>Umweltauswirkungen <strong>(9×)</strong></li>
+                    </ul>
+                    <ul>
+                        <li>Urheberrecht/Copyright <strong>(8×)</strong></li>
+                        <li>Verlust von Kultur ("AI Slop") <strong>(6×)</strong></li>
+                        <li>Black Box – nicht nachvollziehbar</li>
+                    </ul>
+                </div>
+                <p class="info-text" style="margin-top: 0.8em; text-align: center;">
+                    <strong>→ Kritische Auseinandersetzung ist Teil des Seminars!</strong>
+                </p>
+            </section>
+
+            <!-- Slide 7: Was wollt ihr bauen? -->
+            <section class="compact">
+                <h2>Was wollt ihr bauen?</h2>
+                <div class="grid-2">
+                    <div>
+                        <h3>Projekt-Wünsche:</h3>
+                        <ul style="font-size: 0.95em;">
+                            <li><strong>Website/Portfolio</strong> (13 Personen)</li>
+                            <li><strong>Mobile Apps</strong> (9 Personen)</li>
+                            <li>Audio/Musik-Tools (5 Personen)</li>
+                            <li>Games (4 Personen)</li>
+                            <li>Alltags-Tools (4 Personen)</li>
+                            <li>Interaktive Kunst (2 Personen)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Konkrete Ideen:</h3>
+                        <ul style="font-size: 0.9em;">
+                            <li>"Wedding Website"</li>
+                            <li>"Foto-Transfer-App"</li>
+                            <li>"Interaktive Fotografie-Lernseite"</li>
+                            <li>Tool zum Kamera-Upload</li>
+                            <li>Und mehr...</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="info-text" style="text-align: center; margin-top: 1.5em; font-size: 1.1em;">
+                    <strong>→ Wir werden in Gruppen (oder ggf. alleine) eigene Projekte entwickeln!</strong>
+                </p>
+            </section>
+
+            <!-- Slide 8: Wie lernt ihr? -->
+            <section>
+                <h2>Wie lernt ihr am liebsten?</h2>
+                <div class="highlight-box">
+                    <h3 style="text-align: center; color: var(--neon-pink);">Learning by doing</h3>
+                    <p style="text-align: center; margin-top: 0.3em; font-size: 1.1em;"><strong>15 Personen</strong> (am häufigsten!)</p>
+                </div>
+                <div class="grid-2" style="margin-top: 1.5em;">
+                    <div class="stat-box">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Schritt-für-Schritt-Anleitungen</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">9</div>
+                        <div class="stat-label">In der Gruppe</div>
+                    </div>
+                </div>
+                <div class="grid-2" style="margin-top: 1em;">
+                    <div class="stat-box">
+                        <div class="stat-number">4</div>
+                        <div class="stat-label">Experimentell & explorativ</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">4</div>
+                        <div class="stat-label">Theorie zuerst, dann Praxis</div>
+                    </div>
+                </div>
+                <p class="info-text" style="text-align: center; margin-top: 1.5em; font-size: 1.2em;">
+                    <strong>→ Theorie + Praxis + Austausch</strong>
+                </p>
+            </section>
+
+            <!-- Slide 9: Seminarstruktur -->
+            <section>
+                <h2>Seminarüberblick</h2>
+                <div class="grid-2">
+                    <div class="highlight-box">
+                        <h3>11 Sitzungen</h3>
+                        <ul style="font-size: 0.9em;">
+                            <li>Theorie-Input</li>
+                            <li>Hands-on Workshops</li>
+                            <li>Projektarbeit in Gruppen</li>
+                            <li>Tool-Exploration</li>
+                        </ul>
+                    </div>
+                    <div class="warning-box">
+                        <h3>Prüfungsleistung für die 2 LP</h3>
+                        <p><strong>Mini-Projekt</strong> (Sehr gerne als Gruppe!)</p>
+                        <p style="margin-top: 1em;">Präsentation: ca.10-15 Min. (mit Live-Demo)</p>
+                        <p style="margin-top: 0.5em;">Gerne auch Fokus auf den Prozess und die Erfahrungen legen (wie leicht oder schwer es ging, welche Tools ihr ausprobiert habt, etc.)</p>
+                    </div>
+                </div>
+                <p class="info-text" style="text-align: center; margin-top: 2em; font-size: 1.2em;">
+                    <strong>Kritische Reflexion</strong> <span class="arrow">↔</span> <strong>Praktisches Experimentieren</strong>
+                </p>
+            </section>
+
+            <!-- Slide 10: Vibe Coding in den Medien -->
+            <section class="compact">
+                <h2>Vibe Coding in den Medien</h2>
+                <p class="info-text" style="text-align: center; margin-bottom: 1em;">Das Thema ist angekommen – von Feuilleton bis Tech-News</p>
+                <div class="grid-3" style="gap: 0.8em;">
+                    <div style="text-align: center;">
+                        <img src="../bilder/diezeit_artikel.png" alt="DIE ZEIT Artikel über Vibe Coding" style="width: 100%; border-radius: 6px; border: 2px solid var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);">
+                        <p style="font-size: 0.75em; margin-top: 0.5em; color: var(--neon-cyan);">DIE ZEIT</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <img src="../bilder/dlf_vibecoding_articleimage.png" alt="Deutschlandfunk Artikel über Vibe Coding" style="width: 100%; border-radius: 6px; border: 2px solid var(--neon-purple); box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);">
+                        <p style="font-size: 0.75em; margin-top: 0.5em; color: var(--neon-purple);">Deutschlandfunk</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <img src="../bilder/faz_vibecoding.png" alt="FAZ Artikel über Vibe Coding" style="width: 100%; border-radius: 6px; border: 2px solid var(--neon-pink); box-shadow: 0 0 15px rgba(255, 0, 110, 0.2);">
+                        <p style="font-size: 0.75em; margin-top: 0.5em; color: var(--neon-pink);">FAZ</p>
+                    </div>
+                </div>
+                <p class="info-text" style="text-align: center; margin-top: 1.5em; font-size: 1.1em;">
+                    <strong>→ Ein medien- und kulturwissenschaftlich relevantes Phänomen</strong>
+                </p>
+            </section>
+
+            <!-- Slide 11: Vibe Coding - Der Begriff -->
+            <section>
+                <h2>Vibe Coding – Der Begriff</h2>
+                <div class="grid-2" style="align-items: center;">
+                    <div>
+                        <div class="highlight-box">
+                            <h3>Andrej Karpathy</h3>
+                            <p>Tesla AI Director, Feb 2025</p>
+                            <p style="margin-top: 1em; font-size: 1.1em; font-style: italic;">
+                                "There’s a new kind of coding I call ‘vibe coding’, where you fully give in to the vibes, (..) and forget that the code even exists"
+                            </p>
+                        </div>
+                        <ul style="margin-top: 1.5em; font-size: 0.9em;">
+                            <li>Twitter-Thread ging viral</li>
+                            <li>Begriff wurde zum Phänomen</li>
+                            <li>Community nahm es auf</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <img src="../bilder/thread_twitter_andrejkarpathy.png" alt="Andrej Karpathy Tweet über Vibe Coding" style="width: 100%; border-radius: 8px; border: 2px solid var(--neon-cyan); box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 11: Das Versprechen -->
+            <section>
+                <h2>Das Versprechen</h2>
+                <div class="grid-2">
+                    <div class="large-emoji" style="text-align: center;">✨</div>
+                    <div>
+                        <ul>
+                            <li><strong>Jede*r</strong> kann jetzt Apps bauen</li>
+                            <li>Keine Programmierung nötig</li>
+                            <li>Von der Idee zur App in <em>Minuten</em></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="highlight-box" style="margin-top: 2em;">
+                    <h3 style="text-align: center;">"Demokratisierung" der Softwareentwicklung</h3>
+                </div>
+            </section>
+
+            <!-- Slide 12: Aber Moment... -->
+            <section class="compact">
+                <h2>Aber Moment...</h2>
+                <div class="warning-box">
+                    <h3>"Jeder kann Programmierer werden"</h3>
+                    <p>...das haben wir schon in den <strong>1980ern</strong> gehört!</p>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-year">1980er</div>
+                        <p>BASIC, Apple HyperCard, etc.<br>"programming for the rest of us"</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">1990er/2000er</div>
+                        <p>Dreamweaver, Flash, Visual Basic<br>Grafische Tools</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2010er</div>
+                        <p>WordPress, Wix, Bubble, Zapier<br>"No-Code und Web Revolution"</p>
+                    </div>
+                   
+                    <div class="timeline-item">
+                        <div class="timeline-year">2025</div>
+                        <p style="color: var(--neon-pink);"><strong>Vibe Coding<br>Coding mit AI</strong></p>
+                    </div>
+                </div>
+                <div class="grid-2" style="margin-top: 1em; gap: 1em;">
+                    <div style="text-align: center;">
+                        <img src="../bilder/visual_basic.png" alt="Visual Basic Screenshot (1991)" style="width: 100%; max-height: 200px; object-fit: contain; border-radius: 6px; border: 2px solid var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);">
+                        <p style="font-size: 0.7em; margin-top: 0.3em; color: var(--neon-cyan);">Visual Basic (1991)</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <img src="../bilder/media_1434b70a206790701d54681305735732486af601d.png" alt="Dreamweaver Screenshot" style="width: 100%; max-height: 200px; object-fit: contain; border-radius: 6px; border: 2px solid var(--neon-purple); box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);">
+                        <p style="font-size: 0.7em; margin-top: 0.3em; color: var(--neon-purple);">Dreamweaver</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 13: Was ist neu? -->
+            <section>
+                <h2>Was ist neu?</h2>
+                <div class="highlight-box">
+                    <p style="text-align: center; font-size: 1.3em;">
+                        Nicht die Tools, sondern die <strong>Interaktion</strong>
+                    </p>
+                </div>
+                <div style="margin-top: 2em;">
+                    <div style="margin: 1.5em 0;">
+                        Von visuellen Interfaces 
+                        <span class="arrow">→</span> 
+                        <strong>natürlicher Sprache</strong>
+                    </div>
+                    <div style="margin: 1.5em 0;">
+                        Von Templates 
+                        <span class="arrow">→</span> 
+                        <strong>generativem Code</strong>
+                    </div>
+                    <div style="margin: 1.5em 0;">
+                        Von "No-Code" 
+                        <span class="arrow">→</span> 
+                        <strong>"Forget Code"</strong>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 14: Medienwissenschaftliche Perspektive -->
+            <section>
+                <h2>Medienwissenschaftliche Perspektive</h2>
+                <div class="warning-box" style="margin-bottom: 2em;">
+                    <h3>Medien sind mehr als Film, Buch, Foto!</h3>
+                </div>
+                <ul>
+                    <li><strong>Software ist Medium</strong> (Manovich, Fuller)</li>
+                    <li>Code als kulturelle Praxis</li>
+                    <li>Interfaces als epistemologische Objekte</li>
+                    <li><em>"Vibes"</em> als neue Form der Mensch-Maschine-Kommunikation</li>
+                </ul>
+                <div class="highlight-box" style="margin-top: 2em;">
+                    <p style="text-align: center;">Vibe Coding ist nicht nur ein Tech-Trend,<br>sondern <strong>medienwissenschaftlich hochrelevant!</strong></p>
+                </div>
+            </section>
+
+            <!-- Slide 15: Was ist KI? -->
+            <section class="compact">
+                <h2>Was ist KI überhaupt?</h2>
+                <div class="grid-2">
+                    <div>
+                        <h3>Geschichte</h3>
+                        <ul style="font-size: 0.9em;">
+                            <li><strong>1950er: Automation Studies</strong><br>Forschung zur Nachahmung menschlicher Intelligenz</li>
+                            <li style="margin-top: 0.8em;"><strong>1956: John McCarthy</strong><br>Prägt den Begriff "Künstliche Intelligenz"</li>
+                            <li style="margin-top: 0.8em;"><strong>"KI" = Marketing-Begriff</strong><br>Eigentlich: statistische Mustererkennung</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Heute: Large Language Models</h3>
+                        <ul style="font-size: 0.9em;">
+                            <li><strong>Basis:</strong> Tiefe neuronale Netzwerke</li>
+                            <li style="margin-top: 0.8em;"><strong>Training:</strong> Riesige Textdatensätze</li>
+                            <li style="margin-top: 0.8em;"><strong>Beispiele:</strong> GPT-4, Gemini, Claude, LLaMA</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="highlight-box" style="margin-top: 1.5em;">
+                    <h3 style="text-align: center;">LLMs = Grundlage der Coding-Tools</h3>
+                    <p style="text-align: center; margin-top: 0.5em; font-size: 0.95em;">GitHub Copilot, Cursor, Bolt.new – alle basieren auf LLMs</p>
+                </div>
+            </section>
+
+            <!-- Slide 17: Eure Bedenken sind berechtigt -->
+            <section class="compact">
+                <h2>Eure Bedenken sind berechtigt!</h2>
+                <p style="color: var(--neon-cyan); margin-bottom: 1em;">(Aus eurer Umfrage - Mehrfachnennungen möglich)</p>
+                <div class="grid-2">
+                    <div>
+                        <ul style="font-size: 0.95em;">
+                            <li>⚠️ Verlust eigenständigen Denkens <strong>(12×)</strong></li>
+                            <li>⚠️ Datenschutz & Privatsphäre <strong>(11×)</strong></li>
+                            <li>⚠️ Umweltauswirkungen <strong>(9×)</strong></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul style="font-size: 0.95em;">
+                            <li>⚠️ Urheberrecht/Copyright <strong>(8×)</strong></li>
+                            <li>⚠️ Verlust von Kultur ("AI Slop") <strong>(6×)</strong></li>
+                            <li>⚠️ Black Box – nicht nachvollziehbar</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="warning-box" style="margin-top: 1.5em;">
+                    <p style="text-align: center; font-size: 1.1em;">
+                        <strong>All diese Punkte werden wir im Seminar diskutieren!</strong>
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 18: Und trotzdem... -->
+            <section>
+                <h2>Und trotzdem...</h2>
+                <div class="highlight-box">
+                    <h3>KI ist gesellschaftliche Realität</h3>
+                    <p style="margin-top: 1em;">Wir leben in einer Welt, in der KI massiv relevant ist</p>
+                </div>
+                <div style="margin-top: 1.5em;">
+                    <p style="text-align: center; margin-bottom: 1em;"><strong>Koalitionsvertrag 2025 – Themenhäufigkeit:</strong></p>
+                    <div class="grid-3">
+                        <div class="stat-box">
+                            <div class="stat-number" style="color: var(--neon-pink);">50×</div>
+                            <div class="stat-label">Künstliche Intelligenz / KI / AI</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">43×</div>
+                            <div class="stat-label">Migration / Asyl</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">37×</div>
+                            <div class="stat-label">Klima-Themen</div>
+                        </div>
+                    </div>
+                </div>
+                <p class="info-text" style="text-align: center; margin-top: 1.5em; font-size: 1.1em;">
+                    Politik, Wirtschaft, Kultur – überall KI-Hype.<br>
+                    <strong>Wir können nicht so tun, als gäbe es das nicht.</strong>
+                </p>
+            </section>
+
+            <!-- Slide 19: Unsere Position -->
+            <section>
+                <h2>Unsere Position in diesem Seminar</h2>
+                <div class="highlight-box" style="font-size: 1.2em; text-align: center; padding: 2em;">
+                    <p style="font-size: 1.5em; margin-bottom: 1em;">
+                        <strong style="color: var(--neon-cyan);">KRITISCH</strong> 
+                        <span class="arrow">↔</span> 
+                        <strong style="color: var(--neon-pink);">PRAGMATISCH</strong>
+                    </p>
+                    <div style="margin-top: 2em; font-size: 0.9em;">
+                        <p>Wir nutzen die Tools <strong>UND</strong> analysieren sie kritisch.</p>
+                        <p style="margin-top: 0.5em;">Wir experimentieren <strong>UND</strong> reflektieren.</p>
+                        <p style="margin-top: 0.5em;">Wir bauen <strong>UND</strong> hinterfragen.</p>
+                    </div>
+                </div>
+                <p class="info-text" style="text-align: center; margin-top: 2em;">
+                    <strong>Medienwissenschaft</strong> untersucht nicht nur <em>WAS</em>, sondern <em>WIE</em> und <em>WER</em> profitiert/ausgeschlossen wird
+                </p>
+            </section>
+
+            <!-- Slide 20: Plattform -->
+            <section>
+                <h2>🔴 Unsere Lernplattform ist live!</h2>
+                <div class="highlight-box" style="text-align: center; font-size: 1.3em;">
+                    <p><strong>URL:</strong> <code style="font-size: 1.2em;">vibecode.paskie.me</code></p>
+                    <p style="margin-top: 1em;"><strong>Einladungscode:</strong> <code style="font-size: 1.2em;">EMW</code></p>
+                </div>
+                <h3 style="margin-top: 2em;">Was findet ihr dort?</h3>
+                <div class="grid-2" style="margin-top: 1em;">
+                    <ul>
+                        <li>📚 Alle Materialien & Texte</li>
+                        <li>🛠️ <strong>Tool-Liste</strong> mit Direktlinks</li>
+                    </ul>
+                    <ul>
+                        <li>💬 Forum für Austausch</li>
+                        <li>📰 News & Updates</li>
+                    </ul>
+                </div>
+                <p class="info-text" style="text-align: center; margin-top: 2em;">
+                    ➕ Weitere Features kommen – gebaut mit Vibe Coding!
+                </p>
+            </section>
+
+            <!-- Slide 21: Aufgabe bis nächste Woche -->
+            <section class="compact">
+                <h2>Eure Aufgabe bis nächste Woche</h2>
+                <div class="highlight-box">
+                    <h3><span class="checkmark">1.</span> Registriert euch auf der Plattform</h3>
+                    <p class="info-text">vibecode.paskie.me | Code: EMW</p>
+                </div>
+                <div class="highlight-box">
+                    <h3><span class="checkmark">2.</span> Probiert mindestens 2 Tools aus</h3>
+                    <p class="info-text">Links findet ihr auf der Tools-Seite</p>
+                </div>
+                <div class="highlight-box">
+                    <h3><span class="checkmark">3.</span> Schreibt gerne Kommentare zu den Tools</h3>
+                    <p class="info-text">Was für Erfahrungen macht ihr mit den Tools?</p>
+                </div>
+            </section>
+
+            <!-- Slide 22: Nächste Woche -->
+            <section class="compact">
+                <h2>Nächste Woche (28.10.)</h2>
+                <ul style="font-size: 1.1em;">
+                    <li><strong>Tool-Präsentationen</strong><br>Ihr zeigt eure Erfahrungen!</li>
+                    <li style="margin-top: 0.8em;"><strong>Deep Dive: Cursor AI</strong><br>Das Profi-Tool genauer anschauen</li>
+                    <li style="margin-top: 0.8em;"><strong>Hands-on Workshop</strong><br>Gemeinsam erste Mini-Projekte bauen</li>
+                </ul>
+                <div class="warning-box" style="margin-top: 1.5em;">
+                    <p style="text-align: center; font-size: 1.1em;">
+                        <strong>Bringt mit:</strong> Device (am besten Laptop) + Idee für ein kleines Projekt
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 23: Abschluss -->
+            <section class="center">
+                <h1>Ihr seid genau richtig hier!</h1>
+                <div class="large-emoji">🚀✨💜</div>
+                <div class="highlight-box" style="margin-top: 2em; font-size: 1.2em;">
+                    <p>Keine Vorkenntnisse nötig</p>
+                    <p style="margin-top: 0.5em;">Learning by doing</p>
+                    <p style="margin-top: 0.5em;">Kritisch UND praktisch</p>
+                </div>
+                <h2 style="margin-top: 2em; color: var(--neon-cyan);">Bis nächste Woche!</h2>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: true,
+            transition: 'fade',
+            backgroundTransition: 'fade',
+            width: 1280,
+            height: 720,
+            margin: 0.02,
+            minScale: 0.1,
+            maxScale: 2.5,
+            controls: true,
+            progress: true,
+            center: false,
+            keyboard: true,
+            overview: true,
+            touch: true
+        });
+    </script>
+</body>
+</html>
+

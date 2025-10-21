@@ -13,12 +13,36 @@ export default async function NewsDetailPage({ params }: Params) {
 
   const { data } = await supabase
     .from("news")
-    .select("title, body, is_public, published_at")
+    .select("title, body, is_public, published_at, is_html")
     .eq("slug", params.slug)
     .single();
 
   if (!data) return <div className="prose dark:prose-invert">Nicht gefunden</div>;
 
+  // If content is HTML, render it directly in an iframe or as HTML
+  if (data.is_html && data.body) {
+    return (
+      <article className="w-full">
+        <div className="mb-4">
+          <a href="/news" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">← Zurück zu News</a>
+        </div>
+        <div 
+          className="w-full" 
+          dangerouslySetInnerHTML={{ __html: data.body }} 
+        />
+        {data.is_public && (
+          <ShowWhenLoggedOut>
+            <div className="mt-6 p-4 border rounded-lg">
+              <p className="text-sm">Hat dir dieser Artikel gefallen? Registriere dich, um Zugang zum Kurs zu erhalten.</p>
+              <a className="btn mt-2 inline-block" href="/register">Registrieren</a>
+            </div>
+          </ShowWhenLoggedOut>
+        )}
+      </article>
+    );
+  }
+
+  // Default markdown rendering
   return (
     <article className="prose dark:prose-invert max-w-none">
       <h1>{data.title}</h1>
