@@ -25,6 +25,7 @@ export default function Header() {
             <Link href="/lehrplan" aria-label="Lehrplan">Lehrplan</Link>
             <Link href="/forum" aria-label="Forum">Forum</Link>
             <Link href="/tools" aria-label="Tools">Tools</Link>
+            <Link href="/ideen-generator" aria-label="Ideen-Generator">Ideen-Generator</Link>
           </div>
         </div>
         <div className="hidden sm:block">
@@ -62,6 +63,7 @@ export default function Header() {
             <Link href="/lehrplan" aria-label="Lehrplan" className="py-1">Lehrplan</Link>
             <Link href="/forum" aria-label="Forum" className="py-1">Forum</Link>
             <Link href="/tools" aria-label="Tools" className="py-1">Tools</Link>
+            <Link href="/ideen-generator" aria-label="Ideen-Generator" className="py-1">Ideen-Generator</Link>
             <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800" />
             <Navbar layout="vertical" />
           </div>
