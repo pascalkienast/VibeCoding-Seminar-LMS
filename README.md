@@ -6,7 +6,9 @@ Setup
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY`
 - Run schema in Supabase SQL editor: `implementation-guide.sql`.
-- Create Storage bucket `avatars`.
+- Create Storage buckets:
+  - `avatars` (for user profile pictures)
+  - `lehrplan` (for weekly course materials) – see `LEHRPLAN_FILES_SETUP.md` for complete setup
 
 Development
 ```bash
@@ -63,6 +65,7 @@ Admin UI is available to users whose `profiles.role = 'admin'`.
   - `/admin` – dashboard
   - `/admin/news` – create, edit, delete news posts (slug, title, excerpt, body, public)
   - `/admin/weeks` – create, edit, delete Lehrplan weeks (number, date, title, summary, body, published)
+    - **File uploads**: Upload files/materials for each week (stored in Supabase `lehrplan` bucket)
   - `/admin/invites` – create invite codes (hashed client‑side), choose role and max uses
 
 - Navigation
@@ -82,9 +85,15 @@ Admin UI is available to users whose `profiles.role = 'admin'`.
 update public.profiles set role = 'admin' where id = 'USER_UUID';
 ```
 
+- File uploads for weeks
+  - Admins can upload files to weeks at `/admin/weeks`
+  - Students can download files when viewing a week at `/lehrplan/[week_number]`
+  - Setup: see `LEHRPLAN_FILES_SETUP.md`
+  - Requires: `lehrplan` bucket, `lehrplan-files.sql` and `lehrplan-storage-policies.sql`
+
 - Troubleshooting
   - If inserts/updates fail as admin, re‑run `policy-fixes.sql` to refresh policies.
-  - If you see “policy already exists”, the script now `drop policy if exists ...` before creating.
+  - If you see "policy already exists", the script now `drop policy if exists ...` before creating.
   - Ensure the authenticated user has a `profiles` row with `role='admin'` and sign out/in to refresh the session.
 
 
