@@ -67,6 +67,7 @@ Admin UI is available to users whose `profiles.role = 'admin'`.
     - **YouTube embedding**: Add YouTube video URLs to news articles (supports youtube.com/watch?v=ID, youtu.be/ID, or direct video IDs)
   - `/admin/weeks` – create, edit, delete Lehrplan weeks (number, date, title, summary, body, published)
     - **File uploads**: Upload files/materials for each week (stored in Supabase `lehrplan` bucket)
+  - `/admin/featured-tools` – manage featured tools carousel (title, description, images, videos, multiple links)
   - `/admin/invites` – create invite codes (hashed client‑side), choose role and max uses
 
 - Navigation
@@ -97,6 +98,16 @@ update public.profiles set role = 'admin' where id = 'USER_UUID';
   - Students can download files when viewing a week at `/lehrplan/[week_number]`
   - Setup: see `LEHRPLAN_FILES_SETUP.md`
   - Requires: `lehrplan` bucket, `lehrplan-files.sql` and `lehrplan-storage-policies.sql`
+
+- Featured Tools Carousel
+  - Admins can create featured tools with rich content at `/admin/featured-tools`
+  - Featured tools appear in a carousel at the top of `/tools`
+  - Supports: long descriptions, images, YouTube videos, multiple action links
+  - Only active featured tools are displayed to users
+  - No comments on featured tools (comments remain only on regular tools in the grid below)
+  - Setup: Run `featured-tools-setup.sql` in Supabase SQL editor
+  - Requires: `featured-tools` storage bucket for images
+  - See `FEATURED_TOOLS_SETUP.md` for complete setup instructions
 
 - Troubleshooting
   - If inserts/updates fail as admin, re‑run `policy-fixes.sql` to refresh policies.

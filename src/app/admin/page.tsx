@@ -15,6 +15,10 @@ export default function AdminIndex() {
           <div className="font-medium">Einladungen</div>
           <div className="text-sm text-neutral-600 dark:text-neutral-400">Einladungscodes verwalten</div>
         </a>
+        <a className="card block" href="/admin/featured-tools">
+          <div className="font-medium">Featured Tools</div>
+          <div className="text-sm text-neutral-600 dark:text-neutral-400">Hervorgehobene Tools im Carousel verwalten</div>
+        </a>
         <a className="card block" href="/admin/surveys">
           <div className="font-medium">Umfragen</div>
           <div className="text-sm text-neutral-600 dark:text-neutral-400">Umfragen und Fragen erstellen</div>

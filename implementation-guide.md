@@ -69,6 +69,7 @@ create table public.news (
   title text not null,
   excerpt text,
   body text not null,          -- markdown
+  youtube_url text,            -- optional YouTube video URL or ID
   is_public boolean not null default false,
   published_at timestamptz,
   author_id uuid references auth.users,

@@ -34,6 +34,7 @@ create table if not exists public.news (
   title text not null,
   excerpt text,
   body text not null,
+  youtube_url text,
   is_public boolean not null default false,
   published_at timestamptz,
   author_id uuid references auth.users,
@@ -153,3 +154,29 @@ drop policy if exists invite_codes_admin_all on public.invite_codes;
 create policy invite_codes_admin_all on public.invite_codes for all using (
   exists(select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
 );
+
+-- Featured Tools (for carousel on tools page)
+create table if not exists public.featured_tools (
+  id bigserial primary key,
+  title text not null,
+  description text not null,
+  long_description text,
+  youtube_url text,
+  links jsonb default '[]'::jsonb,
+  image_url text,
+  sort_order int default 0,
+  is_active boolean not null default true,
+  created_by uuid references auth.users,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table public.featured_tools enable row level security;
+drop policy if exists featured_tools_read_all on public.featured_tools;
+create policy featured_tools_read_all on public.featured_tools 
+  for select using (is_active = true or auth.uid() is not null);
+drop policy if exists featured_tools_admin_write on public.featured_tools;
+create policy featured_tools_admin_write on public.featured_tools 
+  for all using (
+    exists(select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+  );

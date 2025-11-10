@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
 import RequireAuth from "@/components/RequireAuth";
+import FeaturedToolsCarousel from "@/components/FeaturedToolsCarousel";
 
 type Tool = {
   id: string;
@@ -24,8 +25,20 @@ type Comment = {
   };
 };
 
+type FeaturedTool = {
+  id: number;
+  title: string;
+  description: string;
+  long_description: string | null;
+  youtube_url: string | null;
+  links: Array<{ label: string; url: string }>;
+  image_url: string | null;
+  sort_order: number;
+};
+
 export default function ToolsPage() {
   const [tools, setTools] = useState<Tool[]>([]);
+  const [featuredTools, setFeaturedTools] = useState<FeaturedTool[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -37,6 +50,7 @@ export default function ToolsPage() {
 
   useEffect(() => {
     loadTools();
+    loadFeaturedTools();
     loadUserId();
   }, []);
 
@@ -44,6 +58,22 @@ export default function ToolsPage() {
     const supabase = getSupabaseBrowserClient();
     const { data } = await supabase.auth.getUser();
     setUserId(data?.user?.id || null);
+  };
+
+  const loadFeaturedTools = async () => {
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const { data, error } = await supabase
+        .from("featured_tools")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+
+      if (error) throw error;
+      setFeaturedTools(data || []);
+    } catch (error) {
+      console.error("Error loading featured tools:", error);
+    }
   };
 
   const loadTools = async () => {
@@ -256,6 +286,9 @@ export default function ToolsPage() {
   return (
     <RequireAuth>
       <div className="container py-8">
+        {/* Featured Tools Carousel */}
+        {featuredTools.length > 0 && <FeaturedToolsCarousel tools={featuredTools} />}
+
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Tools</h1>
           <button
