@@ -9,6 +9,7 @@ Setup
 - Create Storage buckets:
   - `avatars` (for user profile pictures)
   - `lehrplan` (for weekly course materials) – see `LEHRPLAN_FILES_SETUP.md` for complete setup
+  - `projects` (for project images) – see `PROJECTS_SETUP.md` for complete setup
 
 Development
 ```bash
@@ -19,6 +20,7 @@ Key routes
 - `/login`, `/register`
 - `/` News (public detail later)
 - `/api/auth/register` invite-only registration
+- `/projekte` Project collaboration platform
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
@@ -108,6 +110,37 @@ update public.profiles set role = 'admin' where id = 'USER_UUID';
   - Setup: Run `featured-tools-setup.sql` in Supabase SQL editor
   - Requires: `featured-tools` storage bucket for images
   - See `FEATURED_TOOLS_SETUP.md` for complete setup instructions
+
+## Projects Feature
+
+Collaborative project platform where users can share project ideas and team up.
+
+- Routes
+  - `/projekte` – browse all projects
+  - `/projekte/neu` – create a new project
+  - `/projekte/[slug]` – project details with comments and participation
+
+- Features
+  - Create detailed project proposals with:
+    - Title, short and long descriptions (Markdown supported)
+    - Project images
+    - External links (GitHub, website, etc.)
+    - Participation settings
+  - Comment on projects
+  - Join projects with "Mitmachen" button
+  - View creation date in German format
+  - Project creators:
+    - **Automatically added as first participant** (marked with ⭐)
+    - Can set maximum participant limit (or unlimited)
+    - Can disable participation (presentation-only mode)
+    - Can delete their own projects
+  - View all project participants
+  - Leave projects you've joined
+
+- Setup
+  - Run `projects-setup.sql` in Supabase SQL editor
+  - Create `projects` storage bucket (public)
+  - See `PROJECTS_SETUP.md` for complete setup instructions
 
 - Troubleshooting
   - If inserts/updates fail as admin, re‑run `policy-fixes.sql` to refresh policies.

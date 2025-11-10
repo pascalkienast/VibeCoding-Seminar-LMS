@@ -24,6 +24,7 @@ export default function Header() {
           <div className="hidden sm:flex items-center gap-4">
             <Link href="/lehrplan" aria-label="Lehrplan">Lehrplan</Link>
             <Link href="/forum" aria-label="Forum">Forum</Link>
+            <Link href="/projekte" aria-label="Projekte">Projekte</Link>
             <Link href="/tools" aria-label="Tools">Tools</Link>
             <Link href="/ideen-generator" aria-label="Ideen-Generator">Ideen-Generator</Link>
           </div>
@@ -58,10 +59,11 @@ export default function Header() {
       </div>
       {/* Mobile dropdown panel */}
       {mobileOpen && (
-        <div id="mobile-menu" className="sm:hidden border-t border-neutral-200 dark:border-neutral-800">
+          <div id="mobile-menu" className="sm:hidden border-t border-neutral-200 dark:border-neutral-800">
           <div className="container py-3 flex flex-col gap-3 text-sm">
             <Link href="/lehrplan" aria-label="Lehrplan" className="py-1">Lehrplan</Link>
             <Link href="/forum" aria-label="Forum" className="py-1">Forum</Link>
+            <Link href="/projekte" aria-label="Projekte" className="py-1">Projekte</Link>
             <Link href="/tools" aria-label="Tools" className="py-1">Tools</Link>
             <Link href="/ideen-generator" aria-label="Ideen-Generator" className="py-1">Ideen-Generator</Link>
             <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800" />
