@@ -63,7 +63,8 @@ Admin UI is available to users whose `profiles.role = 'admin'`.
 
 - Routes
   - `/admin` – dashboard
-  - `/admin/news` – create, edit, delete news posts (slug, title, excerpt, body, public)
+  - `/admin/news` – create, edit, delete news posts (slug, title, excerpt, body, youtube_url, public)
+    - **YouTube embedding**: Add YouTube video URLs to news articles (supports youtube.com/watch?v=ID, youtu.be/ID, or direct video IDs)
   - `/admin/weeks` – create, edit, delete Lehrplan weeks (number, date, title, summary, body, published)
     - **File uploads**: Upload files/materials for each week (stored in Supabase `lehrplan` bucket)
   - `/admin/invites` – create invite codes (hashed client‑side), choose role and max uses
@@ -84,6 +85,12 @@ Admin UI is available to users whose `profiles.role = 'admin'`.
 ```sql
 update public.profiles set role = 'admin' where id = 'USER_UUID';
 ```
+
+- YouTube video embedding in news
+  - Admins can add YouTube URLs when creating/editing news at `/admin/news`
+  - Supports multiple URL formats: `youtube.com/watch?v=ID`, `youtu.be/ID`, or direct video IDs
+  - Videos are displayed as responsive embeds in news articles at `/news/[slug]`
+  - Setup: Run `add-youtube-to-news.sql` in Supabase SQL editor
 
 - File uploads for weeks
   - Admins can upload files to weeks at `/admin/weeks`

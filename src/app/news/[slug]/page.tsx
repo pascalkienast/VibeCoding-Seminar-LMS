@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import MarkdownWithSurveys from "@/components/MarkdownWithSurveys";
 import ShowWhenLoggedOut from "@/components/ShowWhenLoggedOut";
+import YouTubeEmbed from "@/components/YouTubeEmbed";
 
 interface Params { params: { slug: string } }
 
@@ -13,7 +14,7 @@ export default async function NewsDetailPage({ params }: Params) {
 
   const { data } = await supabase
     .from("news")
-    .select("title, body, is_public, published_at, is_html")
+    .select("title, body, is_public, published_at, is_html, youtube_url")
     .eq("slug", params.slug)
     .single();
 
@@ -46,6 +47,7 @@ export default async function NewsDetailPage({ params }: Params) {
   return (
     <article className="prose dark:prose-invert max-w-none">
       <h1>{data.title}</h1>
+      {data.youtube_url && <YouTubeEmbed url={data.youtube_url} title={data.title} />}
       <MarkdownWithSurveys markdown={data.body || ""} />
       {data.is_public && (
         <ShowWhenLoggedOut>

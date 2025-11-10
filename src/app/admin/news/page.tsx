@@ -10,6 +10,7 @@ type News = {
   body: string | null;
   is_public: boolean;
   published_at: string | null;
+  youtube_url: string | null;
 };
 
 export default function AdminNewsPage() {
@@ -18,18 +19,20 @@ export default function AdminNewsPage() {
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [body, setBody] = useState("");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
   const [isPublic, setIsPublic] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editSlug, setEditSlug] = useState("");
   const [editTitle, setEditTitle] = useState("");
   const [editExcerpt, setEditExcerpt] = useState("");
   const [editBody, setEditBody] = useState("");
+  const [editYoutubeUrl, setEditYoutubeUrl] = useState("");
   const [editIsPublic, setEditIsPublic] = useState(false);
 
   const refresh = async () => {
     const { data } = await getSupabaseBrowserClient()
       .from("news")
-      .select("id, slug, title, excerpt, body, is_public, published_at")
+      .select("id, slug, title, excerpt, body, is_public, published_at, youtube_url")
       .order("published_at", { ascending: false })
       .limit(50);
     setItems(data || []);
@@ -47,6 +50,7 @@ export default function AdminNewsPage() {
       title,
       excerpt: excerpt || null,
       body,
+      youtube_url: youtubeUrl || null,
       is_public: isPublic,
       published_at: new Date().toISOString(),
       author_id,
@@ -56,6 +60,7 @@ export default function AdminNewsPage() {
     setTitle("");
     setExcerpt("");
     setBody("");
+    setYoutubeUrl("");
     setIsPublic(false);
     await refresh();
     alert("News erstellt");
@@ -67,6 +72,7 @@ export default function AdminNewsPage() {
     setEditTitle(n.title);
     setEditExcerpt(n.excerpt ?? "");
     setEditBody(n.body ?? "");
+    setEditYoutubeUrl(n.youtube_url ?? "");
     setEditIsPublic(!!n.is_public);
   };
 
@@ -76,6 +82,7 @@ export default function AdminNewsPage() {
     setEditTitle("");
     setEditExcerpt("");
     setEditBody("");
+    setEditYoutubeUrl("");
     setEditIsPublic(false);
   };
 
@@ -89,6 +96,7 @@ export default function AdminNewsPage() {
         title: editTitle,
         excerpt: editExcerpt || null,
         body: editBody,
+        youtube_url: editYoutubeUrl || null,
         is_public: editIsPublic,
       })
       .eq("id", editingId);
@@ -124,6 +132,18 @@ export default function AdminNewsPage() {
           <div className="sm:col-span-2">
             <label className="block text-sm mb-1">Auszug</label>
             <input className="input" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-sm mb-1">YouTube URL (optional)</label>
+            <input 
+              className="input" 
+              value={youtubeUrl} 
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=... oder Video-ID"
+            />
+            <p className="text-xs text-neutral-500 mt-1">
+              Unterstützt: youtube.com/watch?v=ID, youtu.be/ID, oder direkt die Video-ID
+            </p>
           </div>
           <div className="sm:col-span-2">
             <label className="block text-sm mb-1">Inhalt (Markdown)</label>
@@ -167,6 +187,18 @@ export default function AdminNewsPage() {
                   <div className="sm:col-span-2">
                     <label className="block text-sm mb-1">Auszug</label>
                     <input className="input" value={editExcerpt} onChange={(e) => setEditExcerpt(e.target.value)} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm mb-1">YouTube URL (optional)</label>
+                    <input 
+                      className="input" 
+                      value={editYoutubeUrl} 
+                      onChange={(e) => setEditYoutubeUrl(e.target.value)}
+                      placeholder="https://www.youtube.com/watch?v=... oder Video-ID"
+                    />
+                    <p className="text-xs text-neutral-500 mt-1">
+                      Unterstützt: youtube.com/watch?v=ID, youtu.be/ID, oder direkt die Video-ID
+                    </p>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-sm mb-1">Inhalt (Markdown)</label>
