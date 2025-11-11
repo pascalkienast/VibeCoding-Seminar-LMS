@@ -1,10 +1,11 @@
 Vibe Coding LMS (MVP)
 
 Setup
-- Copy `.env.example` to `.env.local` and fill values:
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - `SUPABASE_SERVICE_ROLE_KEY`
+- Create `.env.local` and fill values:
+  - `NEXT_PUBLIC_SUPABASE_URL` – Supabase project URL
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY` – Supabase anonymous key
+  - `SUPABASE_SERVICE_ROLE_KEY` – Supabase service role key
+  - `OPENROUTER_API_KEY` – OpenRouter API key (for Ideen-Generator feature)
 - Run schema in Supabase SQL editor: `implementation-guide.sql`.
 - Create Storage buckets:
   - `avatars` (for user profile pictures)
@@ -21,6 +22,7 @@ Key routes
 - `/` News (public detail later)
 - `/api/auth/register` invite-only registration
 - `/projekte` Project collaboration platform
+- `/ideen-generator` AI-powered idea and problem generator
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
@@ -111,6 +113,31 @@ update public.profiles set role = 'admin' where id = 'USER_UUID';
   - Requires: `featured-tools` storage bucket for images
   - See `FEATURED_TOOLS_SETUP.md` for complete setup instructions
 
+## Ideen- & Problem-Generator
+
+AI-powered tool to generate project ideas and problem statements for Vibe Coding projects.
+
+- Route: `/ideen-generator`
+
+- Features
+  - **Projektideen generieren**: Generate creative project ideas with technology suggestions, features, and learning goals
+  - **Problemstellungen generieren**: Generate realistic problem statements suitable for Design Thinking approaches
+  - Select from multiple AI models (DeepSeek V3, Grok 4 Fast, MiniMax M2)
+  - Adjustable difficulty levels (1-5) for beginners to experts
+  - Markdown-formatted output
+  - Real-time generation with loading states
+
+- Setup
+  - Requires `OPENROUTER_API_KEY` environment variable
+  - Add to `.env.local`: `OPENROUTER_API_KEY=your_api_key_here`
+  - Get API key from [OpenRouter](https://openrouter.ai/)
+
+- Use Cases
+  - Generate inspiration for new Vibe Coding projects
+  - Create problem statements for Design Thinking workshops
+  - Find suitable projects based on skill level
+  - Practice with realistic challenges
+
 ## Projects Feature
 
 Collaborative project platform where users can share project ideas and team up.
@@ -119,6 +146,7 @@ Collaborative project platform where users can share project ideas and team up.
   - `/projekte` – browse all projects
   - `/projekte/neu` – create a new project
   - `/projekte/[slug]` – project details with comments and participation
+  - `/projekte/[slug]/bearbeiten` – edit project (creator only)
 
 - Features
   - Create detailed project proposals with:
@@ -131,6 +159,7 @@ Collaborative project platform where users can share project ideas and team up.
   - View creation date in German format
   - Project creators:
     - **Automatically added as first participant** (marked with ⭐)
+    - Can **edit their projects** (all fields including images)
     - Can set maximum participant limit (or unlimited)
     - Can disable participation (presentation-only mode)
     - Can delete their own projects
@@ -166,6 +195,7 @@ docker run --rm -p 3000:3000 \
   -e NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL \
   -e NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY \
   -e SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY \
+  -e OPENROUTER_API_KEY=YOUR_OPENROUTER_API_KEY \
   vibecode:latest
 ```
 
@@ -174,5 +204,6 @@ Environment variables:
 - `NEXT_PUBLIC_SUPABASE_URL` – Supabase project URL (public)
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` – Supabase anonymous key (public)
 - `SUPABASE_SERVICE_ROLE_KEY` – Supabase service role key (server only; DO NOT expose to the browser)
+- `OPENROUTER_API_KEY` – OpenRouter API key for AI features (server only; optional, required for Ideen-Generator)
 
-You can create `.env.local` from `.env.example` for local dev (`npm run dev`), or use `--env-file` to pass envs into `docker run`.
+You can create `.env.local` for local dev (`npm run dev`), or use `--env-file` to pass envs into `docker run`.

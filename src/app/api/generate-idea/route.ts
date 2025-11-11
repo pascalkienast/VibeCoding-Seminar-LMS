@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const { difficulty, model } = await request.json();
+    const { difficulty, model, type = "idea" } = await request.json();
 
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       5: "anspruchsvoll für erfahrene Entwickler mit guten Kenntnissen",
     };
 
-    const prompt = `Du bist ein kreativer Projektideen-Generator für "Vibe Coding" - eine intuitive, flow-basierte Art des Programmierens, bei der man schnell prototypen erstellt und iteriert.
+    const ideaPrompt = `Du bist ein kreativer Projektideen-Generator für "Vibe Coding" - eine intuitive, flow-basierte Art des Programmierens, bei der man schnell prototypen erstellt und iteriert.
 
 Generiere EINE konkrete Projektidee mit dem Schwierigkeitsgrad: ${difficultyDescriptions[difficulty] || difficultyDescriptions[3]}.
 
@@ -59,6 +59,48 @@ Formatiere die Antwort GENAU so:
 [1-2 Sätze darüber, warum dieses Projekt perfekt für Vibe Coding ist - was macht es intuitiv, schnell prototypierbar und spaßig?]
 
 Antworte NUR auf Deutsch und halte dich strikt an das Format.`;
+
+    const problemPrompt = `Du bist ein Design-Thinking-Experte und Problemstellungs-Generator für "Vibe Coding" - eine intuitive, flow-basierte Art des Programmierens.
+
+Generiere EINE realistische, herausfordernde Problemstellung mit dem Schwierigkeitsgrad: ${difficultyDescriptions[difficulty] || difficultyDescriptions[3]}.
+
+Die Problemstellung sollte:
+- Ein echtes, nachvollziehbares Problem aus dem Alltag, der Arbeitswelt oder dem Studium beschreiben
+- Raum für kreative Lösungsansätze lassen
+- Sich mit Design-Thinking-Methoden bearbeiten lassen
+- Als Vibe-Coding-Projekt technisch umsetzbar sein
+- Mehrere mögliche Lösungsansätze ermöglichen
+
+Formatiere die Antwort GENAU so:
+
+**Problemstellung:** [Ein prägnanter Titel des Problems]
+
+**Kontext:**
+[2-3 Sätze über den Hintergrund: Wer ist betroffen? In welcher Situation tritt das Problem auf?]
+
+**Das Problem:**
+[3-4 Sätze, die das konkrete Problem detailliert beschreiben. Was funktioniert nicht? Welche Schwierigkeiten gibt es?]
+
+**Betroffene Nutzergruppen:**
+- [Nutzergruppe 1]
+- [Nutzergruppe 2]
+- [Optional: Nutzergruppe 3]
+
+**Herausforderungen:**
+- [Herausforderung 1]
+- [Herausforderung 2]
+- [Herausforderung 3]
+(3-4 spezifische Herausforderungen)
+
+**Erfolgskriterien:**
+[2-3 Sätze darüber, woran man erkennen würde, dass das Problem gelöst ist]
+
+**Design-Thinking-Ansatz:**
+[2-3 Sätze mit Hinweisen, wie man mit Design-Thinking-Methoden (Empathize, Define, Ideate, Prototype, Test) an dieses Problem herangehen könnte]
+
+Antworte NUR auf Deutsch und halte dich strikt an das Format.`;
+
+    const prompt = type === "problem" ? problemPrompt : ideaPrompt;
 
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",

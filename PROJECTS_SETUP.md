@@ -92,6 +92,7 @@ using (bucket_id = 'projects');
 - **Automatisch als erster Teilnehmer hinzugefügt** (mindestens 1 Teilnehmer)
 - Maximale Teilnehmerzahl festlegen (oder unbegrenzt)
 - Teilnahme komplett deaktivieren (nur zur Präsentation)
+- **Eigene Projekte bearbeiten** (alle Felder inkl. Bild, Links, Einstellungen)
 - Eigene Projekte löschen
 - Visuell markiert in der Teilnehmerliste (⭐)
 
@@ -100,6 +101,7 @@ using (bucket_id = 'projects');
 - `/projekte` - Übersicht aller Projekte
 - `/projekte/neu` - Neues Projekt erstellen
 - `/projekte/[slug]` - Projektdetails mit Kommentaren und Teilnehmern
+- `/projekte/[slug]/bearbeiten` - Projekt bearbeiten (nur für Ersteller)
 
 ## 5. Technische Details
 
@@ -157,6 +159,9 @@ Nach dem Setup teste folgende Szenarien:
 - [ ] Projekt erstellen mit minimalem Input (nur Pflichtfelder)
 - [ ] Bild hochladen und anzeigen
 - [ ] Externe Links hinzufügen und öffnen
+- [ ] **Eigenes Projekt bearbeiten** (Titel, Beschreibung, Bild, Links, Einstellungen)
+- [ ] Versuch fremdes Projekt zu bearbeiten (sollte abgelehnt werden)
+- [ ] Bild beim Bearbeiten austauschen
 - [ ] Als anderer User dem Projekt beitreten
 - [ ] Maximale Teilnehmerzahl erreichen
 - [ ] Versuch beizutreten wenn voll (sollte abgelehnt werden)

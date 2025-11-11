@@ -38,6 +38,7 @@ Die Projekte-Seite ist jetzt unter `/projekte` verfügbar.
 - ✅ **Wirst automatisch als erster Teilnehmer hinzugefügt** (mit ⭐ markiert)
 - ✅ Maximale Teilnehmerzahl festlegen (z.B. "max. 5 Personen")
 - ✅ Teilnahme komplett deaktivieren (nur zur Präsentation)
+- ✅ **Dein Projekt jederzeit bearbeiten** (alle Felder, inkl. Bild)
 - ✅ Dein Projekt jederzeit löschen
 
 ## Verwendung
@@ -69,6 +70,13 @@ Die Projekte-Seite ist jetzt unter `/projekte` verfügbar.
 1. Scrolle zum Kommentarbereich am Ende der Projektseite
 2. Schreibe deinen Kommentar (Markdown unterstützt)
 3. Klicke **"Kommentar senden"**
+
+### Eigenes Projekt bearbeiten:
+1. Öffne dein Projekt bei `/projekte/[slug]`
+2. Klicke auf **"✏️ Bearbeiten"** (oben rechts, nur für Ersteller sichtbar)
+3. Ändere beliebige Felder (Titel, Beschreibung, Bild, Links, Einstellungen)
+4. Klicke **"Änderungen speichern"**
+5. Du wirst zurück zur Projektseite geleitet
 
 ## Beispiel-Projekt
 
