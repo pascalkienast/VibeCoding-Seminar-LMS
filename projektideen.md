@@ -1,0 +1,10 @@
+- Eine 100% Open Source Webseite mit Deepsite (also das Tool https://huggingface.co/deepsite ausprobieren)
+- Ein RPG Game ausprobieren (siehe die beispiele in den beiden Videos (also z.bsp. hier mit google antigravity https://youtu.be/EKZ7mrqAHgY oder hier mit cursor https://youtu.be/_d4EqpG_dFk) - ich stelle ein assets pack euch bereit /Users/pascalkienast/Desktop/Uni/VibeCoding/kurs/vibecode/Farm RPG - Tiny Asset Pack - (All in One).rar  + wichtig mit tilemap editor wie https://www.spritefusion.com/ zu arbeiten)
+- Mein Lebenslauf als Webseite mit Google Antigravity
+- Eine eigene App mit der „Vibecode App“ (also https://www.vibecodeapp.com/docs mal ausprobieren)
+- KI chattet mit KI (API Key bereitgestellt - openrouter)
+- Mein Lebenslauf als Webseite mit Lovable
+- FSR EMW Protokoll Analyse (alle FSR Protokolle als MD-File verfügbar)
+- Das EMW Quiz! 
+- Ein Klimadaten Dashboard
+- AIDungeon nachgebaut (Text Adventure) - KI Key bereitgestellt

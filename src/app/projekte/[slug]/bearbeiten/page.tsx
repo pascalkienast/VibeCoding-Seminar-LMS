@@ -10,12 +10,13 @@ type ExternalLink = {
 };
 
 interface Params {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default function EditProjectPage({ params }: Params) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [slug, setSlug] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -32,8 +33,16 @@ export default function EditProjectPage({ params }: Params) {
   const [isCreator, setIsCreator] = useState(false);
 
   useEffect(() => {
-    loadProject();
-  }, [params.slug]);
+    params.then((p) => {
+      setSlug(p.slug);
+    });
+  }, [params]);
+
+  useEffect(() => {
+    if (slug) {
+      loadProject();
+    }
+  }, [slug]);
 
   const loadProject = async () => {
     const supabase = getSupabaseBrowserClient();
@@ -51,7 +60,7 @@ export default function EditProjectPage({ params }: Params) {
     const { data: projectData } = await supabase
       .from("projects")
       .select("*")
-      .eq("slug", params.slug)
+      .eq("slug", slug)
       .single();
 
     if (!projectData) {

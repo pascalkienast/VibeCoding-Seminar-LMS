@@ -18,12 +18,26 @@ type Project = {
   participant_count?: number;
 };
 
+type Tool = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  image_url: string | null;
+  presentation_date: string | null;
+  max_presenters: number | null;
+  created_at: string;
+  presenter_count?: number;
+};
+
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [tools, setTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadProjects();
+    loadTools();
   }, []);
 
   const loadProjects = async () => {
@@ -36,13 +50,13 @@ export default function ProjectsPage() {
       .order("created_at", { ascending: false });
 
     if (projectsData) {
-      // Load creator names and participant counts
+      // Load creator emails and participant counts
       const enrichedProjects = await Promise.all(
         projectsData.map(async (project) => {
-          // Get creator name
+          // Get creator email
           const { data: profile } = await supabase
             .from("profiles")
-            .select("username")
+            .select("email")
             .eq("id", project.creator_id)
             .single();
 
@@ -54,7 +68,7 @@ export default function ProjectsPage() {
 
           return {
             ...project,
-            creator_name: profile?.username || "Unbekannt",
+            creator_name: profile?.email || "Unbekannt",
             participant_count: count || 0,
           };
         })
@@ -63,6 +77,36 @@ export default function ProjectsPage() {
       setProjects(enrichedProjects);
     }
     setLoading(false);
+  };
+
+  const loadTools = async () => {
+    const supabase = getSupabaseBrowserClient();
+    
+    // Load presentation tools
+    const { data: toolsData } = await supabase
+      .from("presentation_tools")
+      .select("*")
+      .order("presentation_date", { ascending: true });
+
+    if (toolsData) {
+      // Load presenter counts
+      const enrichedTools = await Promise.all(
+        toolsData.map(async (tool) => {
+          // Get presenter count
+          const { count } = await supabase
+            .from("presentation_tool_presenters")
+            .select("*", { count: "exact", head: true })
+            .eq("tool_id", tool.id);
+
+          return {
+            ...tool,
+            presenter_count: count || 0,
+          };
+        })
+      );
+
+      setTools(enrichedTools);
+    }
   };
 
   if (loading) {
@@ -80,11 +124,33 @@ export default function ProjectsPage() {
     <RequireAuth>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold">Projekte</h1>
+          <h1 className="text-2xl font-semibold">Projekte & Tool-Vorstellungen</h1>
           <Link href="/projekte/neu" className="btn">
             + Neues Projekt
           </Link>
         </div>
+
+        {/* Leistungsschein Info */}
+        <div className="card bg-blue-50 dark:bg-blue-950 border-2 border-blue-200 dark:border-blue-800">
+          <h2 className="text-xl font-semibold mb-3 text-blue-900 dark:text-blue-100">
+            📋 Leistungsschein-Voraussetzung
+          </h2>
+          <div className="space-y-2 text-blue-900 dark:text-blue-100">
+            <p>
+              Um einen Leistungsschein zu erhalten, musst du am <strong>27. Januar 2025</strong> oder <strong>3. Februar 2025</strong> einen Vortrag halten.
+            </p>
+            <p className="font-medium">Du hast zwei Möglichkeiten:</p>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li><strong>Eigenes Projekt vorstellen</strong> – Erstelle ein neues Projekt mit dem Button oben</li>
+              <li><strong>Vibe Coding Tool vorstellen</strong> – Wähle ein Tool aus der Liste unten und trage dich ein</li>
+            </ul>
+            <p className="text-sm mt-3 text-blue-700 dark:text-blue-300">
+              💡 Tipp: Die Tools werden nur vom Admin hinzugefügt. Du kannst dich aber selbstständig als Präsentator eintragen!
+            </p>
+          </div>
+        </div>
+
+        <h2 className="text-xl font-semibold">Projekte</h2>
 
         {projects.length === 0 ? (
           <div className="card text-center py-12">
@@ -141,6 +207,73 @@ export default function ProjectsPage() {
             ))}
           </div>
         )}
+
+        {/* Tools Section */}
+        <div className="mt-12 space-y-6">
+          <div className="border-t pt-8">
+            <h2 className="text-xl font-semibold mb-4">Vibe Coding Tools Vorstellen</h2>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-6">
+              Neue Tools können nur vom Admin hinzugefügt werden. Du kannst dich aber als Präsentator eintragen!
+            </p>
+
+            {tools.length === 0 ? (
+              <div className="card text-center py-8">
+                <p className="text-neutral-600 dark:text-neutral-400">
+                  Noch keine Tools verfügbar. Kontaktiere einen Admin.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {tools.map((tool) => (
+                  <Link
+                    key={tool.id}
+                    href={`/projekte/tool-vortraege/${tool.slug}`}
+                    className="card block hover:shadow-lg transition-shadow"
+                  >
+                    {tool.image_url && (
+                      <img
+                        src={tool.image_url}
+                        alt={tool.title}
+                        className="w-full h-48 object-cover rounded-t-lg -m-4 mb-4"
+                      />
+                    )}
+                    <h3 className="font-semibold text-lg mb-2">{tool.title}</h3>
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 line-clamp-3">
+                      {tool.description}
+                    </p>
+                    <div className="text-xs text-neutral-500 space-y-1">
+                      {tool.presentation_date && (
+                        <div>
+                          📅 Vortrag am:{" "}
+                          {new Date(tool.presentation_date).toLocaleDateString("de-DE", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <span>
+                          👥 {tool.presenter_count} Präsentator
+                          {tool.presenter_count !== 1 ? "en" : ""}
+                        </span>
+                        {tool.max_presenters && (
+                          <span>(max. {tool.max_presenters})</span>
+                        )}
+                      </div>
+                      {tool.max_presenters &&
+                        tool.presenter_count >= tool.max_presenters && (
+                          <div className="text-amber-600 dark:text-amber-400">
+                            ⚠️ Voll belegt
+                          </div>
+                        )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </RequireAuth>
   );

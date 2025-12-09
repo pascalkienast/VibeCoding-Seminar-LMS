@@ -6,7 +6,9 @@ Setup
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` – Supabase anonymous key
   - `SUPABASE_SERVICE_ROLE_KEY` – Supabase service role key
   - `OPENROUTER_API_KEY` – OpenRouter API key (for Ideen-Generator feature)
-- Run schema in Supabase SQL editor: `implementation-guide.sql`.
+- Run schema in Supabase SQL editor (in order):
+  1. `implementation-guide.sql` (base schema)
+  2. `add-email-to-profiles.sql` (adds email field to profiles for easier access)
 - Create Storage buckets:
   - `avatars` (for user profile pictures)
   - `lehrplan` (for weekly course materials) – see `LEHRPLAN_FILES_SETUP.md` for complete setup
@@ -140,15 +142,24 @@ AI-powered tool to generate project ideas and problem statements for Vibe Coding
 
 ## Projects Feature
 
-Collaborative project platform where users can share project ideas and team up.
+Collaborative project platform where users can share project ideas and team up. Also includes a tool presentation feature for Leistungsschein requirements.
 
-- Routes
-  - `/projekte` – browse all projects
+### Leistungsschein Requirements
+
+To receive a Leistungsschein (certificate of achievement), students must give a presentation on **January 27, 2025** or **February 3, 2025**.
+
+**Two options:**
+1. **Present your own project** – Create and present a project you're working on
+2. **Present a Vibe Coding tool** – Choose from available tools and present it to the class
+
+### Routes
+  - `/projekte` – browse all projects and available tools for presentation
   - `/projekte/neu` – create a new project
   - `/projekte/[slug]` – project details with comments and participation
   - `/projekte/[slug]/bearbeiten` – edit project (creator only)
+  - `/projekte/tool-vortraege/[slug]` – tool presentation details
 
-- Features
+### Project Features
   - Create detailed project proposals with:
     - Title, short and long descriptions (Markdown supported)
     - Project images
@@ -157,17 +168,27 @@ Collaborative project platform where users can share project ideas and team up.
   - Comment on projects
   - Join projects with "Mitmachen" button
   - View creation date in German format
+  - **Participant display**: Shows username and email address for coordination
   - Project creators:
     - **Automatically added as first participant** (marked with ⭐)
     - Can **edit their projects** (all fields including images)
     - Can set maximum participant limit (or unlimited)
     - Can disable participation (presentation-only mode)
     - Can delete their own projects
-  - View all project participants
+  - View all project participants with email addresses
   - Leave projects you've joined
 
-- Setup
-  - Run `projects-setup.sql` in Supabase SQL editor
+### Tool Presentation Features
+  - View available Vibe Coding tools for presentation
+  - Register as a presenter for a tool (max 3 presenters per tool)
+  - View presentation dates (January 27 or February 3)
+  - See who else is presenting the same tool with email addresses
+  - Comment on tool presentations
+  - **Admin-only**: Tools can only be added via SQL (no UI for creating tools)
+
+### Setup
+  - Run `projects-setup.sql` in Supabase SQL editor for projects
+  - Run `tools-presentation-setup.sql` in Supabase SQL editor for tool presentations
   - Create `projects` storage bucket (public)
   - See `PROJECTS_SETUP.md` for complete setup instructions
 

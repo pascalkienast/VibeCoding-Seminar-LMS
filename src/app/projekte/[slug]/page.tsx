@@ -24,6 +24,7 @@ type Participant = {
   user_id: string;
   joined_at: string;
   username?: string;
+  email?: string;
 };
 
 type Comment = {
@@ -35,7 +36,7 @@ type Comment = {
 };
 
 interface Params {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default function ProjectDetailPage({ params }: Params) {
@@ -48,10 +49,19 @@ export default function ProjectDetailPage({ params }: Params) {
   const [isCreator, setIsCreator] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
+  const [slug, setSlug] = useState<string>("");
 
   useEffect(() => {
-    loadProject();
-  }, [params.slug]);
+    params.then((p) => {
+      setSlug(p.slug);
+    });
+  }, [params]);
+
+  useEffect(() => {
+    if (slug) {
+      loadProject();
+    }
+  }, [slug]);
 
   const loadProject = async () => {
     const supabase = getSupabaseBrowserClient();
@@ -65,7 +75,7 @@ export default function ProjectDetailPage({ params }: Params) {
     const { data: projectData } = await supabase
       .from("projects")
       .select("*")
-      .eq("slug", params.slug)
+      .eq("slug", slug)
       .single();
 
     if (!projectData) {
@@ -83,15 +93,19 @@ export default function ProjectDetailPage({ params }: Params) {
       .eq("project_id", projectData.id);
 
     if (participantsData) {
-      // Enrich with usernames
+      // Enrich with usernames and emails
       const enrichedParticipants = await Promise.all(
         participantsData.map(async (p) => {
           const { data: profile } = await supabase
             .from("profiles")
-            .select("username")
+            .select("username, email")
             .eq("id", p.user_id)
             .single();
-          return { ...p, username: profile?.username || "Unbekannt" };
+          return { 
+            ...p, 
+            username: profile?.username || "Unbekannt",
+            email: profile?.email || ""
+          };
         })
       );
       setParticipants(enrichedParticipants);
@@ -327,18 +341,27 @@ export default function ProjectDetailPage({ params }: Params) {
             </div>
 
             {participants.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
+              <div className="space-y-2">
                 {participants.map((p) => (
                   <div
                     key={p.id}
-                    className={`px-3 py-1 rounded-full text-sm ${
+                    className={`px-4 py-3 rounded-lg text-sm ${
                       p.user_id === project.creator_id
-                        ? "bg-blue-100 dark:bg-blue-900 font-medium"
+                        ? "bg-blue-100 dark:bg-blue-900"
                         : "bg-neutral-100 dark:bg-neutral-800"
                     }`}
                   >
-                    {p.username}
-                    {p.user_id === project.creator_id && " ⭐"}
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-base">
+                        {p.email}
+                        {p.user_id === project.creator_id && " ⭐"}
+                      </span>
+                    </div>
+                    {p.username && (
+                      <div className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
+                        {p.username}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
