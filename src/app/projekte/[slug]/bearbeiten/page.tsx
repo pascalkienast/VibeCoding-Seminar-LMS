@@ -72,7 +72,7 @@ export default function EditProjectPage({ params }: Params) {
     // Check if user is creator
     if (projectData.creator_id !== userId) {
       alert("Du bist nicht berechtigt, dieses Projekt zu bearbeiten.");
-      router.push(`/projekte/${params.slug}`);
+      router.push(`/projekte/${slug}`);
       return;
     }
 
@@ -128,7 +128,7 @@ export default function EditProjectPage({ params }: Params) {
       // Upload new image if provided
       if (imageFile) {
         const fileExt = imageFile.name.split(".").pop();
-        const fileName = `${params.slug}-${Date.now()}.${fileExt}`;
+        const fileName = `${slug}-${Date.now()}.${fileExt}`;
         
         // Delete old image if exists
         if (currentImageUrl) {
@@ -168,7 +168,7 @@ export default function EditProjectPage({ params }: Params) {
       if (updateError) throw updateError;
 
       // Redirect to project page
-      router.push(`/projekte/${params.slug}`);
+      router.push(`/projekte/${slug}`);
     } catch (error: any) {
       alert(`Fehler: ${error.message}`);
       setSubmitting(false);
@@ -195,7 +195,7 @@ export default function EditProjectPage({ params }: Params) {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Projekt bearbeiten</h1>
           <button
-            onClick={() => router.push(`/projekte/${params.slug}`)}
+            onClick={() => router.push(`/projekte/${slug}`)}
             className="btn-outline"
           >
             Abbrechen
@@ -374,11 +374,11 @@ export default function EditProjectPage({ params }: Params) {
             >
               {submitting ? "Wird gespeichert..." : "Änderungen speichern"}
             </button>
-            <button
-              type="button"
-              onClick={() => router.push(`/projekte/${params.slug}`)}
-              className="btn-outline"
-            >
+          <button
+            type="button"
+            onClick={() => router.push(`/projekte/${slug}`)}
+            className="btn-outline"
+          >
               Abbrechen
             </button>
           </div>
