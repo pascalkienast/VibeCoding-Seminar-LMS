@@ -262,7 +262,7 @@ export default function ProjectsPage() {
                         )}
                       </div>
                       {tool.max_presenters &&
-                        tool.presenter_count >= tool.max_presenters && (
+                        (tool.presenter_count || 0) >= tool.max_presenters && (
                           <div className="text-amber-600 dark:text-amber-400">
                             ⚠️ Voll belegt
                           </div>
