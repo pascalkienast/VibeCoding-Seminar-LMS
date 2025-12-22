@@ -29,13 +29,6 @@ Cursor ist ein KI-gestützter Code-Editor, der auf VS Code basiert und speziell 
 - **Refactoring**: Automatisches Umschreiben und Optimieren von Code
 - **Multi-File Changes**: Änderungen über mehrere Dateien hinweg
 
-## 💡 Warum Cursor?
-
-- **Produktivitätssteigerung**: Entwickler bei OpenAI & Perplexity nutzen Cursor
-- **Native IDE-Erfahrung**: Alle VS Code Extensions funktionieren
-- **Team-Integration**: Slack-Integration für kollaboratives Coding
-- **Cloud + Lokal**: Wähle zwischen verschiedenen AI-Modellen
-
 ## 🎯 Use Cases
 
 - Full-Stack Development mit Next.js, React, Node.js
