@@ -348,7 +348,14 @@ export default function QuestionDetail({ params }: PageProps) {
             dangerouslySetInnerHTML={{ __html: question.body }}
           />
 
-          <AttachmentList files={question.attachments} />
+          <AttachmentList 
+            files={question.attachments.map(att => ({
+              id: att.id.toString(),
+              file_name: att.file_name,
+              file_url: att.file_url,
+              file_type: att.file_type,
+            }))} 
+          />
         </div>
 
         {/* Answers Section */}
@@ -495,7 +502,14 @@ function AnswerCard({
           dangerouslySetInnerHTML={{ __html: answer.body }}
         />
 
-        <AttachmentList files={answer.attachments} />
+        <AttachmentList 
+          files={answer.attachments.map(att => ({
+            id: att.id.toString(),
+            file_name: att.file_name,
+            file_url: att.file_url,
+            file_type: att.file_type,
+          }))} 
+        />
       </div>
 
       {/* Nested Replies */}
@@ -517,3 +531,4 @@ function AnswerCard({
     </div>
   );
 }
+
