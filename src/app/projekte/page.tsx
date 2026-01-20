@@ -1,281 +1,338 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
-import RequireAuth from "@/components/RequireAuth";
 import Link from "next/link";
 
-type Project = {
+type PresentationSlot = {
   id: string;
-  title: string;
-  slug: string;
-  description: string;
-  image_url: string | null;
-  creator_id: string;
-  allow_participants: boolean;
-  max_participants: number | null;
+  presenter_name: string;
+  topic: string;
+  presentation_date: string;
+  group_members: string | null;
   created_at: string;
-  creator_name?: string;
-  participant_count?: number;
 };
 
-type Tool = {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  image_url: string | null;
-  presentation_date: string | null;
-  max_presenters: number | null;
-  created_at: string;
-  presenter_count?: number;
+const STORAGE_KEY = "my_presentation_slots";
+
+// Helper functions for localStorage
+const getMySlotIds = (): string[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+const addMySlotId = (id: string) => {
+  const ids = getMySlotIds();
+  if (!ids.includes(id)) {
+    ids.push(id);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+  }
+};
+
+const removeMySlotId = (id: string) => {
+  const ids = getMySlotIds().filter((i) => i !== id);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
 };
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [tools, setTools] = useState<Tool[]>([]);
+  const [slots, setSlots] = useState<PresentationSlot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mySlotIds, setMySlotIds] = useState<string[]>([]);
+  
+  // Form state
+  const [presenterName, setPresenterName] = useState("");
+  const [topic, setTopic] = useState("");
+  const [date, setDate] = useState<"2025-01-27" | "2025-02-03">("2025-01-27");
+  const [groupMembers, setGroupMembers] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    loadProjects();
-    loadTools();
+    loadSlots();
+    setMySlotIds(getMySlotIds());
   }, []);
 
-  const loadProjects = async () => {
+  const loadSlots = async () => {
     const supabase = getSupabaseBrowserClient();
     
-    // Load projects
-    const { data: projectsData } = await supabase
-      .from("projects")
+    const { data: slotsData, error: loadError } = await supabase
+      .from("presentation_slots")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("presentation_date", { ascending: true })
+      .order("created_at", { ascending: true });
 
-    if (projectsData) {
-      // Load creator emails and participant counts
-      const enrichedProjects = await Promise.all(
-        projectsData.map(async (project) => {
-          // Get creator email
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("email")
-            .eq("id", project.creator_id)
-            .single();
-
-          // Get participant count
-          const { count } = await supabase
-            .from("project_participants")
-            .select("*", { count: "exact", head: true })
-            .eq("project_id", project.id);
-
-          return {
-            ...project,
-            creator_name: profile?.email || "Unbekannt",
-            participant_count: count || 0,
-          };
-        })
-      );
-
-      setProjects(enrichedProjects);
+    if (loadError) {
+      console.error("Error loading slots:", loadError);
     }
+
+    setSlots(slotsData || []);
     setLoading(false);
   };
 
-  const loadTools = async () => {
-    const supabase = getSupabaseBrowserClient();
-    
-    // Load presentation tools
-    const { data: toolsData } = await supabase
-      .from("presentation_tools")
-      .select("*")
-      .order("presentation_date", { ascending: true });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
 
-    if (toolsData) {
-      // Load presenter counts
-      const enrichedTools = await Promise.all(
-        toolsData.map(async (tool) => {
-          // Get presenter count
-          const { count } = await supabase
-            .from("presentation_tool_presenters")
-            .select("*", { count: "exact", head: true })
-            .eq("tool_id", tool.id);
-
-          return {
-            ...tool,
-            presenter_count: count || 0,
-          };
-        })
-      );
-
-      setTools(enrichedTools);
+    if (!presenterName.trim()) {
+      setError("Bitte gib deinen Namen ein.");
+      setSubmitting(false);
+      return;
     }
+
+    if (!topic.trim()) {
+      setError("Bitte gib ein Thema ein.");
+      setSubmitting(false);
+      return;
+    }
+
+    const supabase = getSupabaseBrowserClient();
+
+    const { data: insertedData, error: insertError } = await supabase
+      .from("presentation_slots")
+      .insert({
+        presenter_name: presenterName.trim(),
+        topic: topic.trim(),
+        presentation_date: date,
+        group_members: groupMembers.trim() || null,
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      setError("Fehler beim Eintragen: " + insertError.message);
+      setSubmitting(false);
+      return;
+    }
+
+    // Save to localStorage so user can delete their own entry
+    if (insertedData) {
+      addMySlotId(insertedData.id);
+      setMySlotIds(getMySlotIds());
+    }
+
+    // Reset form and reload
+    setPresenterName("");
+    setTopic("");
+    setGroupMembers("");
+    setSubmitting(false);
+    loadSlots();
+  };
+
+  const handleDelete = async (slotId: string) => {
+    if (!confirm("Möchtest du diesen Eintrag wirklich löschen?")) {
+      return;
+    }
+
+    const supabase = getSupabaseBrowserClient();
+    const { error: deleteError } = await supabase
+      .from("presentation_slots")
+      .delete()
+      .eq("id", slotId);
+
+    if (deleteError) {
+      alert("Fehler beim Löschen: " + deleteError.message);
+      return;
+    }
+
+    // Remove from localStorage
+    removeMySlotId(slotId);
+    setMySlotIds(getMySlotIds());
+
+    loadSlots();
+  };
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("de-DE", {
+      weekday: "long",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  // Group slots by date
+  const slotsByDate = {
+    "2025-01-27": slots.filter((s) => s.presentation_date === "2025-01-27"),
+    "2025-02-03": slots.filter((s) => s.presentation_date === "2025-02-03"),
   };
 
   if (loading) {
     return (
-      <RequireAuth>
-        <div className="space-y-4">
-          <h1 className="text-2xl font-semibold">Projekte</h1>
-          <p>Lädt...</p>
-        </div>
-      </RequireAuth>
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold">Vorträge & Projekte</h1>
+        <p>Lädt...</p>
+      </div>
     );
   }
 
   return (
-    <RequireAuth>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold">Projekte & Tool-Vorstellungen</h1>
-          <Link href="/projekte/neu" className="btn">
-            + Neues Projekt
-          </Link>
-        </div>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-semibold">Vorträge & Projekte</h1>
 
-        {/* Leistungsschein Info */}
-        <div className="card bg-blue-50 dark:bg-blue-950 border-2 border-blue-200 dark:border-blue-800">
-          <h2 className="text-xl font-semibold mb-3 text-blue-900 dark:text-blue-100">
-            📋 Leistungsschein-Voraussetzung
-          </h2>
-          <div className="space-y-2 text-blue-900 dark:text-blue-100">
-            <p>
-              Um einen Leistungsschein zu erhalten, musst du am <strong>27. Januar 2025</strong> oder <strong>3. Februar 2025</strong> einen Vortrag halten.
-            </p>
-            <p className="font-medium">Du hast zwei Möglichkeiten:</p>
-            <ul className="list-disc list-inside space-y-1 ml-2">
-              <li><strong>Eigenes Projekt vorstellen</strong> – Erstelle ein neues Projekt mit dem Button oben</li>
-              <li><strong>Vibe Coding Tool vorstellen</strong> – Wähle ein Tool aus der Liste unten und trage dich ein</li>
-            </ul>
-            <p className="text-sm mt-3 text-blue-700 dark:text-blue-300">
-              💡 Tipp: Die Tools werden nur vom Admin hinzugefügt. Du kannst dich aber selbstständig als Präsentator eintragen!
-            </p>
-          </div>
-        </div>
-
-        <h2 className="text-xl font-semibold">Projekte</h2>
-
-        {projects.length === 0 ? (
-          <div className="card text-center py-12">
-            <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-              Noch keine Projekte vorhanden.
-            </p>
-            <Link href="/projekte/neu" className="btn inline-block">
-              Erstes Projekt erstellen
-            </Link>
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {projects.map((project) => (
-              <Link
-                key={project.id}
-                href={`/projekte/${project.slug}`}
-                className="card block hover:shadow-lg transition-shadow"
-              >
-                {project.image_url && (
-                  <img
-                    src={project.image_url}
-                    alt={project.title}
-                    className="w-full h-48 object-cover rounded-t-lg -m-4 mb-4"
-                  />
-                )}
-                <h2 className="font-semibold text-lg mb-2">{project.title}</h2>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 line-clamp-3">
-                  {project.description}
-                </p>
-                <div className="text-xs text-neutral-500 space-y-1">
-                  <div>Erstellt von: {project.creator_name}</div>
-                  <div>📅 {new Date(project.created_at).toLocaleDateString("de-DE", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric"
-                  })}</div>
-                  {project.allow_participants && (
-                    <div className="flex items-center gap-2">
-                      <span>👥 {project.participant_count} Teilnehmer</span>
-                      {project.max_participants && (
-                        <span>
-                          (max. {project.max_participants})
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  {!project.allow_participants && (
-                    <div className="text-amber-600 dark:text-amber-400">
-                      🔒 Keine weiteren Teilnehmer
-                    </div>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* Tools Section */}
-        <div className="mt-12 space-y-6">
-          <div className="border-t pt-8">
-            <h2 className="text-xl font-semibold mb-4">Vibe Coding Tools Vorstellen</h2>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-6">
-              Neue Tools können nur vom Admin hinzugefügt werden. Du kannst dich aber als Präsentator eintragen!
-            </p>
-
-            {tools.length === 0 ? (
-              <div className="card text-center py-8">
-                <p className="text-neutral-600 dark:text-neutral-400">
-                  Noch keine Tools verfügbar. Kontaktiere einen Admin.
-                </p>
-              </div>
-            ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {tools.map((tool) => (
-                  <Link
-                    key={tool.id}
-                    href={`/projekte/tool-vortraege/${tool.slug}`}
-                    className="card block hover:shadow-lg transition-shadow"
-                  >
-                    {tool.image_url && (
-                      <img
-                        src={tool.image_url}
-                        alt={tool.title}
-                        className="w-full h-48 object-cover rounded-t-lg -m-4 mb-4"
-                      />
-                    )}
-                    <h3 className="font-semibold text-lg mb-2">{tool.title}</h3>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 line-clamp-3">
-                      {tool.description}
-                    </p>
-                    <div className="text-xs text-neutral-500 space-y-1">
-                      {tool.presentation_date && (
-                        <div>
-                          📅 Vortrag am:{" "}
-                          {new Date(tool.presentation_date).toLocaleDateString("de-DE", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                          })}
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2">
-                        <span>
-                          👥 {tool.presenter_count} Präsentator
-                          {tool.presenter_count !== 1 ? "en" : ""}
-                        </span>
-                        {tool.max_presenters && (
-                          <span>(max. {tool.max_presenters})</span>
-                        )}
-                      </div>
-                      {tool.max_presenters &&
-                        (tool.presenter_count || 0) >= tool.max_presenters && (
-                          <div className="text-amber-600 dark:text-amber-400">
-                            ⚠️ Voll belegt
-                          </div>
-                        )}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+      {/* Leistungsschein Info */}
+      <div className="card bg-blue-50 dark:bg-blue-950 border-2 border-blue-200 dark:border-blue-800">
+        <h2 className="text-xl font-semibold mb-3 text-blue-900 dark:text-blue-100">
+          📋 Leistungsschein-Voraussetzung
+        </h2>
+        <div className="space-y-2 text-blue-900 dark:text-blue-100">
+          <p>
+            Um einen Leistungsschein zu erhalten, musst du am <strong>27. Januar 2025</strong> oder <strong>3. Februar 2025</strong> einen Vortrag halten.
+          </p>
+          <p className="font-medium">Du hast zwei Möglichkeiten:</p>
+          <ul className="list-disc list-inside space-y-1 ml-2">
+            <li><strong>Eigenes Projekt vorstellen</strong> – Erstelle ein neues Projekt in der Übersicht</li>
+            <li><strong>Vibe Coding Tool vorstellen</strong> – Wähle ein Tool deiner Wahl!</li>
+          </ul>
+          <p className="text-sm mt-3 text-blue-700 dark:text-blue-300">
+            💡 Tipp: Trage dich unten in der Tabelle ein, um deinen Vortragsslot zu reservieren! (ca. 5-10 Min. pro Person)
+          </p>
         </div>
       </div>
-    </RequireAuth>
+
+      {/* Central Presentation Slots Table */}
+      <div className="card bg-green-50 dark:bg-green-950 border-2 border-green-200 dark:border-green-800">
+        <h2 className="text-xl font-semibold mb-4 text-green-900 dark:text-green-100">
+          🎤 Vortrags-Eintragung
+        </h2>
+
+        {/* Add new slot form */}
+        <form onSubmit={handleSubmit} className="mb-6 p-4 bg-white dark:bg-neutral-800 rounded-lg">
+          <h3 className="font-medium mb-3">Neuen Vortrag eintragen</h3>
+          {error && (
+            <div className="mb-3 p-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded text-sm">
+              {error}
+            </div>
+          )}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <div>
+              <label className="block text-sm font-medium mb-1">Dein Name *</label>
+              <input
+                type="text"
+                value={presenterName}
+                onChange={(e) => setPresenterName(e.target.value)}
+                placeholder="z.B. Max Mustermann"
+                className="w-full px-3 py-2 border rounded-lg dark:bg-neutral-700 dark:border-neutral-600"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Thema *</label>
+              <input
+                type="text"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="z.B. Mein Portfolio-Projekt"
+                className="w-full px-3 py-2 border rounded-lg dark:bg-neutral-700 dark:border-neutral-600"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Datum *</label>
+              <select
+                value={date}
+                onChange={(e) => setDate(e.target.value as "2025-01-27" | "2025-02-03")}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-neutral-700 dark:border-neutral-600"
+              >
+                <option value="2025-01-27">27. Januar 2025</option>
+                <option value="2025-02-03">3. Februar 2025</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Weitere Mitglieder</label>
+              <input
+                type="text"
+                value={groupMembers}
+                onChange={(e) => setGroupMembers(e.target.value)}
+                placeholder="z.B. Lisa, Tom"
+                className="w-full px-3 py-2 border rounded-lg dark:bg-neutral-700 dark:border-neutral-600"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="btn w-full disabled:opacity-50"
+              >
+                {submitting ? "Wird eingetragen..." : "Eintragen"}
+              </button>
+            </div>
+          </div>
+        </form>
+
+        {/* Slots Table */}
+        <div className="space-y-6">
+          {(["2025-01-27", "2025-02-03"] as const).map((dateKey) => (
+            <div key={dateKey}>
+              <h3 className="font-semibold text-lg mb-3 text-green-800 dark:text-green-200">
+                📅 {formatDate(dateKey)}
+              </h3>
+              {slotsByDate[dateKey].length === 0 ? (
+                <p className="text-sm text-neutral-500 italic">
+                  Noch keine Einträge für diesen Tag.
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b dark:border-neutral-700">
+                        <th className="text-left py-2 px-3 font-medium">#</th>
+                        <th className="text-left py-2 px-3 font-medium">Thema</th>
+                        <th className="text-left py-2 px-3 font-medium">Präsentator(en)</th>
+                        <th className="text-left py-2 px-3 font-medium w-20"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {slotsByDate[dateKey].map((slot, index) => (
+                        <tr
+                          key={slot.id}
+                          className="border-b dark:border-neutral-700 hover:bg-green-100 dark:hover:bg-green-900/30"
+                        >
+                          <td className="py-2 px-3 text-neutral-500">{index + 1}</td>
+                          <td className="py-2 px-3 font-medium">{slot.topic}</td>
+                          <td className="py-2 px-3">
+                            {slot.presenter_name}
+                            {slot.group_members && (
+                              <span className="text-neutral-500">
+                                , {slot.group_members}
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-2 px-3">
+                            {mySlotIds.includes(slot.id) && (
+                              <button
+                                onClick={() => handleDelete(slot.id)}
+                                className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-xs"
+                              >
+                                Löschen
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Link to detailed overview */}
+      <div className="text-center">
+        <Link
+          href="/projekte/uebersicht"
+          className="btn inline-flex items-center gap-2"
+        >
+          📂 Zur detaillierten Seite mit Überblick
+        </Link>
+      </div>
+    </div>
   );
 }
-
