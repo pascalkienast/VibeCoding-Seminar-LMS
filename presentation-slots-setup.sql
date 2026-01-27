@@ -9,7 +9,7 @@ CREATE TABLE presentation_slots (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   presenter_name text NOT NULL,  -- Free text: name of presenter(s)
   topic text NOT NULL,
-  presentation_date date NOT NULL CHECK (presentation_date IN ('2025-01-27', '2025-02-03')),
+  presentation_date date NOT NULL CHECK (presentation_date IN ('2026-01-27', '2026-02-03')),
   group_members text,  -- Optional: additional group members as free text
   created_at timestamptz DEFAULT now()
 );

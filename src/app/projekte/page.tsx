@@ -46,7 +46,7 @@ export default function ProjectsPage() {
   // Form state
   const [presenterName, setPresenterName] = useState("");
   const [topic, setTopic] = useState("");
-  const [date, setDate] = useState<"2025-01-27" | "2025-02-03">("2025-01-27");
+  const [date, setDate] = useState<"2026-01-27" | "2026-02-03">("2026-01-27");
   const [groupMembers, setGroupMembers] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -158,8 +158,8 @@ export default function ProjectsPage() {
 
   // Group slots by date
   const slotsByDate = {
-    "2025-01-27": slots.filter((s) => s.presentation_date === "2025-01-27"),
-    "2025-02-03": slots.filter((s) => s.presentation_date === "2025-02-03"),
+    "2026-01-27": slots.filter((s) => s.presentation_date === "2026-01-27"),
+    "2026-02-03": slots.filter((s) => s.presentation_date === "2026-02-03"),
   };
 
   if (loading) {
@@ -182,7 +182,7 @@ export default function ProjectsPage() {
         </h2>
         <div className="space-y-2 text-blue-900 dark:text-blue-100">
           <p>
-            Um einen Leistungsschein zu erhalten, musst du am <strong>27. Januar 2025</strong> oder <strong>3. Februar 2025</strong> einen Vortrag halten.
+            Um einen Leistungsschein zu erhalten, musst du am <strong>27. Januar 2026</strong> oder <strong>3. Februar 2026</strong> einen Vortrag halten.
           </p>
           <p className="font-medium">Du hast zwei Möglichkeiten:</p>
           <ul className="list-disc list-inside space-y-1 ml-2">
@@ -236,11 +236,11 @@ export default function ProjectsPage() {
               <label className="block text-sm font-medium mb-1">Datum *</label>
               <select
                 value={date}
-                onChange={(e) => setDate(e.target.value as "2025-01-27" | "2025-02-03")}
+                onChange={(e) => setDate(e.target.value as "2026-01-27" | "2026-02-03")}
                 className="w-full px-3 py-2 border rounded-lg dark:bg-neutral-700 dark:border-neutral-600"
               >
-                <option value="2025-01-27">27. Januar 2025</option>
-                <option value="2025-02-03">3. Februar 2025</option>
+                <option value="2026-01-27">27. Januar 2026</option>
+                <option value="2026-02-03">3. Februar 2026</option>
               </select>
             </div>
             <div>
@@ -267,7 +267,7 @@ export default function ProjectsPage() {
 
         {/* Slots Table */}
         <div className="space-y-6">
-          {(["2025-01-27", "2025-02-03"] as const).map((dateKey) => (
+          {(["2026-01-27", "2026-02-03"] as const).map((dateKey) => (
             <div key={dateKey}>
               <h3 className="font-semibold text-lg mb-3 text-green-800 dark:text-green-200">
                 📅 {formatDate(dateKey)}
